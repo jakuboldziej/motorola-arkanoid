@@ -5,6 +5,7 @@ from pygame.locals import (
     K_ESCAPE,
     KEYDOWN,
     QUIT,
+    K_SPACE,
 )
 
 WIDTH, HEIGHT = 800, 600

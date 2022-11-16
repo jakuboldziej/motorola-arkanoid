@@ -8,79 +8,126 @@ class Player(pygame.sprite.Sprite):
         super(Player, self).__init__()
         self.surf = pygame.Surface((100, 25))
         self.surf.fill(WHITE)
-        self.rect = self.surf.get_rect(center=((WIDTH/2, HEIGHT-25)))
+        self.x = WIDTH/2
+        self.y = HEIGHT-25
+        self.rect = self.surf.get_rect(center=((self.x, self.y)))
         self.playerDirection = "center"
 
     def update(self, pressed_keys):
         if pressed_keys[K_LEFT]:
             self.rect.move_ip(-5, 0)
+            # self.rect[0] -= 5
             self.playerDirection = "left"
         elif pressed_keys[K_RIGHT]:
             self.rect.move_ip(5, 0)
+            # self.rect[0] += 5
             self.playerDirection = "right"
         else:
             self.playerDirection = "center"
+        if ball.stick == True:
+            if pressed_keys[K_SPACE]:
+                ball.stick = False
+                if self.playerDirection == "left":
+                    ball.directionX = -5
+                    ball.directionY = -5
+                elif self.playerDirection == "right":
+                    ball.directionX = 5
+                    ball.directionY = -5
+                else:
+                    ball.directionX = 0
+                    ball.directionY = -5
 
-        if self.rect.left < 0:
+        if self.rect.left <= 0:
             self.rect.left = 0
-        elif self.rect.right > 800:
-            self.rect.right = 800
+        elif self.rect.right >= WIDTH:
+            self.rect.right = WIDTH
 
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         super(Ball, self).__init__()
         self.surf = pygame.Surface((10, 10))
         self.surf.fill(WHITE)
-        self.rect = self.surf.get_rect(center=(WIDTH/2, 0))
-        self.speedX = 0
-        self.speedY = 5
-        self.directionX = self.speedX  
-        self.directionY = self.speedY
+        self.rect = self.surf.get_rect(center=(WIDTH/2, HEIGHT - 55))
+        self.directionX = 0 
+        self.directionY = 0
+        self.stick = True
         
     def update(self):
-        self.rect.move_ip(self.directionX, self.directionY)
-        if self.rect.bottom >= WIDTH:
-            self.directionY = -self.speedY
-            self.kill()
-            # add endgame
-        elif self.rect.top < 0:
-            self.directionY = self.speedY
-        elif self.rect.left < 0:
-            self.directionX = 5
-        elif self.rect.right > WIDTH:
-            self.directionX = -5
+        if ball.stick:
+            self.directionX = 0
+            self.directionY = 0
+            ball.rect[0] = player.rect[0] + 45
+            ball.rect[1] = player.rect[1] - 25
+        else:
+            if self.rect.bottom >= WIDTH - 180:
+                ball.stick = True
+            elif self.rect.top < 0:
+                self.directionY = 5
+            elif self.rect.left < 0:
+                self.directionX = 5
+            elif self.rect.right > WIDTH:
+                self.directionX = -5
+                
+            self.rect.move_ip(self.directionX, self.directionY)
 
     def collision(self):
         if pygame.sprite.collide_rect(player, ball):
             if player.playerDirection == "left":
-                self.speedX = -5
-                self.directionX = self.speedX
+                self.directionX = -random.randint(1, 5)
             elif player.playerDirection == "right":
-                self.speedX = 5
-                self.directionX = self.speedX
-            self.directionY = -self.speedY
+                self.directionX = random.randint(1, 5)
+            self.directionY = -5
             self.rect.move_ip(self.directionX, self.directionY)
+
+        # better collision detection physics
+        collision = pygame.sprite.spritecollideany(ball, bricks)
+        if collision:
+            self.directionY = 5
+
+class Brick(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super(Brick, self).__init__()
+        self.surf = pygame.Surface((80, 30))
+        self.surf.fill((255, 0, 0))
+        self.x = x
+        self.y = y
+        self.rect = self.surf.get_rect(center=(x, y))
+
+    def draw(self):
+        pass
 
 pygame.init()
 
 display = pygame.display.set_mode((WIDTH, HEIGHT))
 
-player = Player()
-ball = Ball()
-
 background = pygame.Surface(display.get_size())
 background.fill(BLACK)
 
+player = Player()
+ball = Ball()
+
+bricks = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 all_sprites.add(ball)
 
+for i in range(8):
+    new_brick = Brick(80 + i*90, HEIGHT/4)
+    bricks.add(new_brick)
+    all_sprites.add(new_brick)
+
+for i in range(8):
+    new_brick = Brick(80 + i*90, HEIGHT/4 - 40)
+    bricks.add(new_brick)
+    all_sprites.add(new_brick)
+
 def drawWindow():
     display.blit(background, (0, 0))
-    
-    display.blit(player.surf, player.rect)
+    for entity in all_sprites:
+        display.blit(entity.surf, entity.rect)
 
-    display.blit(ball.surf, ball.rect)
+    for brick in bricks:
+        brick.draw()
 
     pygame.display.flip()
 
@@ -90,6 +137,11 @@ def updateEntites():
     player.update(pressed_keys)
     ball.update()
 
+def debugging():
+    # print("PLAYER", player.rect[0], player.rect[1])
+    # print("BALL", ball.directionX, ball.directionY)
+    # print(ball.stick)
+    pass
 
 running = True
 while running:
@@ -103,5 +155,7 @@ while running:
     drawWindow()
     updateEntites()
     ball.collision()
+
+    debugging()
 
     clock.tick(FPS)
