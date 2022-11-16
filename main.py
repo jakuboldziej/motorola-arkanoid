@@ -1,5 +1,5 @@
 import pygame
-from pygame.locals import *
+from config import *
 
 import random
 
@@ -7,16 +7,16 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
         self.surf = pygame.Surface((100, 25))
-        self.surf.fill((255, 255, 255))
+        self.surf.fill(WHITE)
         self.rect = self.surf.get_rect(center=((WIDTH/2, HEIGHT-25)))
         self.playerDirection = "center"
 
     def update(self, pressed_keys):
         if pressed_keys[K_LEFT]:
-            self.rect.move_ip(-1, 0)
+            self.rect.move_ip(-5, 0)
             self.playerDirection = "left"
         elif pressed_keys[K_RIGHT]:
-            self.rect.move_ip(1, 0)
+            self.rect.move_ip(5, 0)
             self.playerDirection = "right"
         else:
             self.playerDirection = "center"
@@ -30,10 +30,10 @@ class Ball(pygame.sprite.Sprite):
     def __init__(self):
         super(Ball, self).__init__()
         self.surf = pygame.Surface((10, 10))
-        self.surf.fill((255, 255, 255))
+        self.surf.fill(WHITE)
         self.rect = self.surf.get_rect(center=(WIDTH/2, 0))
         self.speedX = 0
-        self.speedY = 1
+        self.speedY = 5
         self.directionX = self.speedX  
         self.directionY = self.speedY
         
@@ -41,28 +41,27 @@ class Ball(pygame.sprite.Sprite):
         self.rect.move_ip(self.directionX, self.directionY)
         if self.rect.bottom >= WIDTH:
             self.directionY = -self.speedY
-            # self.kill()
+            self.kill()
+            # add endgame
         elif self.rect.top < 0:
             self.directionY = self.speedY
         elif self.rect.left < 0:
-            self.directionX = 1
+            self.directionX = 5
         elif self.rect.right > WIDTH:
-            self.directionX = -1
+            self.directionX = -5
 
     def collision(self):
         if pygame.sprite.collide_rect(player, ball):
             if player.playerDirection == "left":
-                self.speedX = -1
+                self.speedX = -5
                 self.directionX = self.speedX
             elif player.playerDirection == "right":
-                self.speedX = 1
+                self.speedX = 5
                 self.directionX = self.speedX
             self.directionY = -self.speedY
             self.rect.move_ip(self.directionX, self.directionY)
 
 pygame.init()
-
-WIDTH, HEIGHT = 800, 600
 
 display = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -70,7 +69,7 @@ player = Player()
 ball = Ball()
 
 background = pygame.Surface(display.get_size())
-background.fill((0, 0, 0))
+background.fill(BLACK)
 
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
@@ -104,3 +103,5 @@ while running:
     drawWindow()
     updateEntites()
     ball.collision()
+
+    clock.tick(FPS)
