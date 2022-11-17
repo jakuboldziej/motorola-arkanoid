@@ -51,9 +51,11 @@ class Ball(pygame.sprite.Sprite):
         self.directionX = 0 
         self.directionY = 0
         self.stick = True
+        self.direction = "up"
         
     def update(self):
         if ball.stick:
+            self.direction = "up"
             self.directionX = 0
             self.directionY = 0
             ball.rect[0] = player.rect[0] + 45
@@ -63,10 +65,13 @@ class Ball(pygame.sprite.Sprite):
                 ball.stick = True
             elif self.rect.top < 0:
                 self.directionY = 5
+                self.direction = "down"
             elif self.rect.left < 0:
                 self.directionX = 5
+                self.direction = "right"
             elif self.rect.right > WIDTH:
                 self.directionX = -5
+                self.direction = "left"
                 
             self.rect.move_ip(self.directionX, self.directionY)
 
@@ -79,10 +84,23 @@ class Ball(pygame.sprite.Sprite):
             self.directionY = -5
             self.rect.move_ip(self.directionX, self.directionY)
 
-        # better collision detection physics
+        # hit_list = pygame.sprite.spritecollide(self, bricks, False)
+        # for brick in hit_list:
+        #     if self.rect[0] + self.rect[2] > brick.rect[0]:
+        #         print("right")
+
         collision = pygame.sprite.spritecollideany(ball, bricks)
         if collision:
-            self.directionY = 5
+            if self.direction == "left":
+                self.directionX = 5
+            elif self.direction == "right":
+                self.directionX = -5
+            elif self.direction == "down":
+                self.directionY = -5
+            else:
+                self.directionY = 5
+            collision.kill()
+
 
 class Brick(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -93,7 +111,7 @@ class Brick(pygame.sprite.Sprite):
         self.y = y
         self.rect = self.surf.get_rect(center=(x, y))
 
-    def draw(self):
+    def update(self):
         pass
 
 pygame.init()
@@ -126,9 +144,6 @@ def drawWindow():
     for entity in all_sprites:
         display.blit(entity.surf, entity.rect)
 
-    for brick in bricks:
-        brick.draw()
-
     pygame.display.flip()
 
 def updateEntites():
@@ -140,7 +155,7 @@ def updateEntites():
 def debugging():
     # print("PLAYER", player.rect[0], player.rect[1])
     # print("BALL", ball.directionX, ball.directionY)
-    # print(ball.stick)
+    # print(ball.rect[0], ball.rect[1])
     pass
 
 running = True
