@@ -10,6 +10,7 @@ from pygame.locals import (
 
 WIDTH, HEIGHT = 800, 600
 FPS = 60
+SCORE = 0
 clock = time.Clock()
 
 # Colors
