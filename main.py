@@ -48,16 +48,22 @@ class Platform(pygame.sprite.Sprite):
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         super(Ball, self).__init__()
-        self.surf = pygame.Surface((11, 11))
-        self.surf.fill(WHITE)
-        self.rect = self.surf.get_rect(center=(WIDTH/2, HEIGHT - 55))
+        # self.surf = pygame.Surface((11, 11))
+        # self.surf.fill(WHITE)
+        # self.rect = self.surf.get_rect(center=(WIDTH/2, HEIGHT - 55))
+        self.radius = 9
+        self.rect = pygame.draw.circle(display, WHITE, (5, 5), 8)
         self.speedX = 4
         self.speedY = 4
         self.directionX = 0 
         self.directionY = 0
         self.stick = True
         self.direction = "0,up"
-        
+    
+    def draw(self):
+        pygame.draw.circle(display, WHITE, (self.rect[0] + 7, self.rect[1] + 7), self.radius)
+        # pygame.draw.rect(display, WHITE, pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
+
     def update(self):
         if ball.stick:
             self.direction = "right,up"
@@ -92,16 +98,19 @@ class Ball(pygame.sprite.Sprite):
                     self.directionX = -5
                 elif platform.platformDirection == "right":
                     self.directionX = 5
+                print("center")
             elif collidePoint > center*2:
                 if platform.platformDirection == "left":
                     self.directionX = -3
                 elif platform.platformDirection == "right":
                     self.directionX = 3
+                print("right")
             else:
                 if platform.platformDirection == "left":
                     self.directionX = -3
                 elif platform.platformDirection == "right":
                     self.directionX = 3
+                print("left")
                 
             self.directionY = -self.speedY
             self.rect.move_ip(self.directionX, self.directionY)
@@ -149,7 +158,7 @@ ball = Ball()
 bricks = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(platform)
-all_sprites.add(ball)
+# all_sprites.add(ball)
 
 for i in range(8):
     new_brick = Brick(80 + i*90, HEIGHT/4)
@@ -171,6 +180,8 @@ def drawWindow():
     for entity in all_sprites:
         display.blit(entity.surf, entity.rect)
 
+    ball.draw()
+
     drawScore()
 
     pygame.display.flip()
@@ -187,19 +198,39 @@ def debugging():
     # print(ball.direction)
     pass
 
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == KEYDOWN:
-            if event.key == K_ESCAPE:
+def winScreen():
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    running = False
+            elif event.type == QUIT:
                 running = False
-        elif event.type == QUIT:
-            running = False
 
-    drawWindow()
-    updateEntites()
-    ball.collision()
+        fontt = pygame.font.Font(pygame.font.get_default_font(), 32)
+        textt = fontt.render('Score: ' + str(SCORE), True, (0, 255, 0))
+        display.blit(textt, (WIDTH/2, HEIGHT/2))
+    
+    pygame.display.flip()
 
-    debugging()
+def main():
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    running = False
+            elif event.type == QUIT:
+                running = False
 
-    clock.tick(FPS)
+        drawWindow()
+        updateEntites()
+        ball.collision()
+
+        debugging()
+
+        clock.tick(FPS)
+
+if __name__ == '__main__':
+    main()
