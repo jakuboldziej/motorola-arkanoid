@@ -1,5 +1,56 @@
-import pygame
 from config import *
+
+pygame.init()
+
+font = pygame.font.Font(pygame.font.get_default_font(), 32)
+
+class Button():
+    def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, onePress=False):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.onclickFunction = onclickFunction
+        self.onePress = onePress
+
+        self.fillColors = {
+            'normal': '#ffffff',
+            'hover': '#666666',
+            'pressed': '#333333',
+        }
+
+        self.buttonSurface = pygame.Surface((self.width, self.height))
+        self.buttonRect = pygame.Rect(self.x, self.y, self.width, self.height)
+
+        self.buttonSurf = font.render(buttonText, True, (20, 20, 20))
+
+        self.alreadyPressed = False
+
+    def process(self):
+        mousePos = pygame.mouse.get_pos()
+        
+        self.buttonSurface.fill(self.fillColors['normal'])
+        if self.buttonRect.collidepoint(mousePos):
+            self.buttonSurface.fill(self.fillColors['hover'])
+
+            if pygame.mouse.get_pressed(num_buttons=3)[0]:
+                self.buttonSurface.fill(self.fillColors['pressed'])
+
+                if self.onePress:
+                    self.onclickFunction()
+
+                elif not self.alreadyPressed:
+                    self.onclickFunction()
+                    self.alreadyPressed = True
+
+            else:
+                self.alreadyPressed = False
+
+        self.buttonSurface.blit(self.buttonSurf, [
+            self.buttonRect.width/2 - self.buttonSurf.get_rect().width/2,
+            self.buttonRect.height/2 - self.buttonSurf.get_rect().height/2
+        ])
+        display.blit(self.buttonSurface, self.buttonRect)
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self):
@@ -84,58 +135,12 @@ class Ball(pygame.sprite.Sprite):
                 
             self.rect.move_ip(self.directionX, self.directionY)
 
-    def collision(self):
-        global SCORE
-        if pygame.sprite.collide_rect(platform, ball):
-            self.direction = self.direction.split(",")[0] + ",up"
-            center = platform.rect[2]//3
-            collidePoint = ball.rect[0] + ball.rect[2] - platform.rect[0]
-            # XD
-            if center < collidePoint < center*2:
-                if platform.platformDirection == "left":
-                    self.directionX = -5
-                elif platform.platformDirection == "right":
-                    self.directionX = 5
-                print("center")
-            elif collidePoint > center*2:
-                if platform.platformDirection == "left":
-                    self.directionX = -3
-                elif platform.platformDirection == "right":
-                    self.directionX = 3
-                print("right")
-            else:
-                if platform.platformDirection == "left":
-                    self.directionX = -3
-                elif platform.platformDirection == "right":
-                    self.directionX = 3
-                print("left")
-                
-            self.directionY = -self.speedY
-            self.rect.move_ip(self.directionX, self.directionY)
-
-        collision = pygame.sprite.spritecollide(ball, bricks, False)
-        for brick in collision:
-            if self.rect.left < brick.rect.right and self.direction.split(",")[0] == "left" and not self.rect.right < brick.rect.right:
-                self.directionX = +self.speedX
-                # print(self.direction.split(","), "RIGHT")
-            elif self.rect.right > brick.rect.left and self.direction.split(",")[0] == "right" and not self.rect.left > brick.rect.left:
-                self.directionX = -self.speedX
-                # print(self.direction.split(","), "LEFT")
-            elif self.rect.top < brick.rect.bottom and self.rect.bottom > brick.rect.bottom:
-                self.directionY = +self.speedY
-                # print(self.direction.split(","), "BOTTOM")
-            elif self.rect.bottom > brick.rect.top and self.direction.split(",")[1] == "down":
-                self.directionY = -self.speedY
-                # print(self.direction.split(","), "TOP")
-            brick.kill()
-            # Score logic
-            SCORE += 10
-
 class Brick(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, color):
         super(Brick, self).__init__()
+        self.color = color
         self.surf = pygame.Surface((80, 30))
-        self.surf.fill((255, 0, 0))
+        self.surf.fill(color)
         self.x = x
         self.y = y
         self.rect = self.surf.get_rect(center=(x, y))
@@ -145,6 +150,7 @@ class Brick(pygame.sprite.Sprite):
 
 platform = Platform()
 ball = Ball()
+
 bricks = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(platform)
