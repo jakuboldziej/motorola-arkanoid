@@ -7,20 +7,38 @@ from pygame.locals import (
     QUIT,
     K_SPACE,
 )
+from os import path
+
+BASEDIR = path.dirname(path.realpath(__file__))
+
+CURRENTLEVEL = 1
+BRICKAMOUNT = 16
+FPS = 60
+SCORE = 0
+WINSCORE = 0
+PREVSCORE = 0
+clock = pygame.time.Clock()
+playing = False
 
 # Colors
-WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
+WHITE = (255, 255, 255)
+SILVER = ((209, 208, 207), 50 * CURRENTLEVEL)
+ORANGE = ((199, 88, 2), 60)
+AQUA = ((87, 228, 250), 70)
+GREEN = ((5, 255, 80), 80)
+RED = ((255, 0, 0), 90)
+BLUE = ((4, 24, 204), 100)
+PINK = ((226, 5, 255), 110)
+GOLD = ((251, 255, 5), 120)
+
+COLORS = (SILVER, ORANGE, AQUA, GREEN, RED, BLUE, PINK, GOLD)
+
+COLORFUL = (SILVER, ORANGE, AQUA, GREEN, RED, BLUE, PINK)
 
 WIDTH, HEIGHT = 800, 600
 display = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('Arkanoid')
 
 background = pygame.Surface(display.get_size())
 background.fill(BLACK)
-
-FPS = 60
-SCORE = 0
-clock = pygame.time.Clock()

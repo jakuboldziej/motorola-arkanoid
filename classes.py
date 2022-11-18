@@ -57,6 +57,7 @@ class Platform(pygame.sprite.Sprite):
         super(Platform, self).__init__()
         self.surf = pygame.Surface((100, 25))
         self.surf.fill(WHITE)
+        self.speed = 7
         self.x = WIDTH/2
         self.y = HEIGHT-25
         self.rect = self.surf.get_rect(center=((self.x, self.y)))
@@ -64,11 +65,11 @@ class Platform(pygame.sprite.Sprite):
 
     def update(self, pressed_keys):
         if pressed_keys[K_LEFT]:
-            self.rect.move_ip(-6, 0)
+            self.rect.move_ip(-self.speed, 0)
             # self.rect[0] -= 5
             self.platformDirection = "left"
         elif pressed_keys[K_RIGHT]:
-            self.rect.move_ip(6, 0)
+            self.rect.move_ip(+self.speed, 0)
             # self.rect[0] += 5
             self.platformDirection = "right"
         else:
@@ -102,8 +103,9 @@ class Ball(pygame.sprite.Sprite):
         # self.rect = self.surf.get_rect(center=(WIDTH/2, HEIGHT - 55))
         self.radius = 9
         self.rect = pygame.draw.circle(display, WHITE, (5, 5), 8)
-        self.speedX = 4
-        self.speedY = 4
+        self.speed = 8
+        self.speedX = self.speed
+        self.speedY = self.speed
         self.directionX = 0 
         self.directionY = 0
         self.stick = True
@@ -138,20 +140,29 @@ class Ball(pygame.sprite.Sprite):
 class Brick(pygame.sprite.Sprite):
     def __init__(self, x, y, color):
         super(Brick, self).__init__()
-        self.color = color
-        self.surf = pygame.Surface((80, 30))
-        self.surf.fill(color)
         self.x = x
         self.y = y
+        self.color = color
+        self.health = 1
+        self.value = color[1]
+        self.surf = pygame.Surface((80, 30))
+        self.surf.fill(color[0])
         self.rect = self.surf.get_rect(center=(x, y))
 
-    def update(self):
-        pass
+        if self.color in COLORFUL:
+            self.health = 1
+            if self.color == SILVER:
+                self.health = 2
+                for i in range(CURRENTLEVEL+1):
+                    if i % 8 == 0 and i != 0:
+                        self.health += 1
+        else:
+            self.health = -1
+
 
 platform = Platform()
 ball = Ball()
 
 bricks = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
-all_sprites.add(platform)
 # all_sprites.add(ball)
