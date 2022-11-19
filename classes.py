@@ -145,7 +145,9 @@ class Brick(pygame.sprite.Sprite):
         self.color = color
         self.health = 1
         self.value = color[1]
-        self.surf = pygame.Surface((80, 30))
+        self.brickwidth = 80
+        self.brickheight = 30
+        self.surf = pygame.Surface((self.brickwidth, self.brickheight))
         self.surf.fill(color[0])
         self.rect = self.surf.get_rect(center=(x, y))
 
@@ -158,7 +160,10 @@ class Brick(pygame.sprite.Sprite):
                         self.health += 1
         else:
             self.health = -1
-
+    def get_width(self):
+        return self.brickwidth
+    def get_height(self):
+        return self.brickheight
 
 platform = Platform()
 ball = Ball()
