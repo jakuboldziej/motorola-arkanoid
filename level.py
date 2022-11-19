@@ -29,5 +29,5 @@ class Level:
                     self.winscore += new_brick.color[1] * CURRENTLEVEL
 
             bricks.add(new_brick)
-            all_sprites.add(new_brick)
+            all_sprites.add(new_brick) #a
 
