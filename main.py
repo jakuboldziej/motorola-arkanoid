@@ -54,8 +54,8 @@ def manageCollisions():
         ball.rect.move_ip(ball.directionX, ball.directionY)
 
     # Brick - Ball Collision
-    collision = pygame.sprite.spritecollide(ball, bricks, False)
-    for brick in collision:
+    brickCollision = pygame.sprite.spritecollide(ball, bricks, False)
+    for brick in brickCollision:
         if ball.rect.left < brick.rect.right and ball.direction.split(",")[0] == "left" and not ball.rect.right < brick.rect.right:
             ball.directionX = +ball.speedX
             # print(self.direction.split(","), "RIGHT")
@@ -70,11 +70,19 @@ def manageCollisions():
             # print(self.direction.split(","), "TOP")
         brick.health -= 1
         if brick.health == 0:
-            brick.kill()
             global SCORE
+            brick.kill()
+            if brick.color != SILVER:
+                powerUp = PowerUp(brick.rect[0] + brick.rect[2]/2, brick.rect[1] + brick.rect[3]*2, brick.color[0])
+                powerUp.draw()
+                powerUps.add(powerUp)
+
             SCORE += brick.value
             if SCORE == WINSCORE + PREVSCORE:
                 loadNextLevel()
+    powerUpCollision = pygame.sprite.spritecollide(platform, powerUps, False)
+    for powerUp in powerUpCollision:
+        powerUp.kill()
 
 # Drawing and updating
 def drawScore():
@@ -86,6 +94,9 @@ def drawWindow():
     for entity in all_sprites:
         display.blit(entity.surf, entity.rect)
 
+    for powerUp in powerUps:
+        display.blit(powerUp.surf, powerUp.rect)
+
     display.blit(platform.surf, platform.rect)
 
     ball.draw()
@@ -96,6 +107,9 @@ def drawWindow():
 
 def updateEntites():
     pressed_keys = pygame.key.get_pressed()
+
+    for powerUp in powerUps:
+        powerUp.update()
 
     platform.update(pressed_keys)
     ball.update()

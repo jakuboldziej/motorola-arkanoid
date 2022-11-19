@@ -159,10 +159,27 @@ class Brick(pygame.sprite.Sprite):
         else:
             self.health = -1
 
+class PowerUp(pygame.sprite.Sprite):
+    def __init__(self, x, y, color):
+        super(PowerUp, self).__init__()
+        self.x = x
+        self.y = y
+        self.color = color
+        self.speed = 3
+        self.surf = pygame.Surface((80, 80))
+        self.surf.fill(color)
+        self.rect = self.surf.get_rect(center=(x, y))
+
+    def update(self):
+        self.rect[1] += self.speed
+
+    def draw(self):
+        pass
 
 platform = Platform()
 ball = Ball()
 
 bricks = pygame.sprite.Group()
+powerUps = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 # all_sprites.add(ball)
