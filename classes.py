@@ -74,7 +74,7 @@ class Platform(pygame.sprite.Sprite):
             self.platformDirection = "right"
         else:
             self.platformDirection = "center"
-        if ball.stick == True:
+        if ball.stick == True and ball.rect[1] < WIDTH - 200:
             if pressed_keys[K_SPACE]:
                 ball.stick = False
                 if self.platformDirection == "left":
@@ -103,7 +103,7 @@ class Ball(pygame.sprite.Sprite):
         # self.rect = self.surf.get_rect(center=(WIDTH/2, HEIGHT - 55))
         self.radius = 9
         self.rect = pygame.draw.circle(display, WHITE, (5, 5), 8)
-        self.speed = 8
+        self.speed = 6
         self.speedX = self.speed
         self.speedY = self.speed
         self.directionX = 0 
@@ -172,9 +172,6 @@ class PowerUp(pygame.sprite.Sprite):
 
     def update(self):
         self.rect[1] += self.speed
-
-    def draw(self):
-        pass
 
 platform = Platform()
 ball = Ball()

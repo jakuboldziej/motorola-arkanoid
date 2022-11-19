@@ -72,9 +72,9 @@ def manageCollisions():
         if brick.health == 0:
             global SCORE
             brick.kill()
-            if brick.color != SILVER:
+            # print(SCORE, PREVSCORE, CURRENTLEVEL * 1000)
+            if brick.color != SILVER and SCORE > CURRENTLEVEL * 1000:
                 powerUp = PowerUp(brick.rect[0] + brick.rect[2]/2, brick.rect[1] + brick.rect[3]*2, brick.color[0])
-                powerUp.draw()
                 powerUps.add(powerUp)
 
             SCORE += brick.value
@@ -85,9 +85,11 @@ def manageCollisions():
         powerUp.kill()
 
 # Drawing and updating
-def drawScore():
-    text = font.render('Score: ' + str(SCORE), True, (0, 255, 0))
-    display.blit(text, (10, 10))
+def drawText():
+    text1 = font.render('Score: ' + str(SCORE), True, (0, 255, 0))
+    text2 = font.render('Level: ' + str(CURRENTLEVEL), True, (0, 255, 0))
+    display.blit(text1, (10, 10))
+    display.blit(text2, (WIDTH-150, 10))
 
 def drawWindow():
     display.blit(background, (0, 0))
@@ -101,7 +103,7 @@ def drawWindow():
 
     ball.draw()
 
-    drawScore()
+    drawText()
 
     pygame.display.flip()
 
