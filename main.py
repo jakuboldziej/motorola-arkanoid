@@ -280,7 +280,7 @@ def main():
 
 # Utils
 def saveEditor():
-    with open("editorLevels.json", "r+") as f:
+    with open("levels.json", "r+") as f:
         data = json.load(f)
         levels = data["levels"]
 
@@ -292,7 +292,7 @@ def saveEditor():
     new_level = {"levelId": int(lastLevelId)+1, "gridArray": editorClass.editingGridBlockArray}
     levels.append(new_level)
     jsonLevels = json.dumps(data, indent=1)
-    with open('editorLevels.json', "w") as f:
+    with open('levels.json', "w") as f:
         f.write(str(jsonLevels))
 
     for gridBlock in gridBlocks:
