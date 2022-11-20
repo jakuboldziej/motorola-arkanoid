@@ -1,32 +1,29 @@
 from classes import *
 
-import random
-
 class Level:
-    def __init__(self, brickAmount):
+    def __init__(self):
         super(Level, self).__init__()
-        self.brickAmount = brickAmount
         self.winscore = 0
-        self.Spacebetween = 90   # odstep miedzy blokami
-        self.Margin = 85 #poczatkowy margines
+
+    def calcScore(self, brick):
+        if brick.color in COLORFUL: 
+            self.winscore += brick.color[1]
+        elif brick.color == SILVER:
+            self.winscore += brick.color[1] * CURRENTLEVEL
 
     def draw(self):
-        Testbrick = Brick(0,0,random.choice(COLORS))
-        brickx = Testbrick.rect[2]
-        self.Margin = (WIDTH+self.brickAmount/2 - (brickx *self.brickAmount/2))/2    #self.brickAmount/ilość kolumn
-        for i in range(self.brickAmount):
-            if i < self.brickAmount/2:
-                new_brick = Brick(self.Margin + i*self.Spacebetween, HEIGHT/4, random.choice(COLORS))
-                if new_brick.color in COLORFUL: 
-                    self.winscore += new_brick.color[1]
-                elif new_brick.color == SILVER:
-                    self.winscore += new_brick.color[1] * CURRENTLEVEL
-            else:
-                new_brick = Brick(self.Margin + (i-8)*self.Spacebetween, HEIGHT/4 - 40, random.choice(COLORS))
-                if new_brick.color in COLORFUL: 
-                    self.winscore += new_brick.color[1]
-                elif new_brick.color == SILVER:
-                    self.winscore += new_brick.color[1] * CURRENTLEVEL
+        for i in range(32):
+            if i < 32/4:
+                new_brick = Brick(i * WIDTH/10+120, HEIGHT/4-40, color=random.choice(COLORS))
+                self.calcScore(new_brick)
+            elif i < 32/4+8:
+                new_brick = Brick((i-7) * WIDTH/10+40, HEIGHT/4-10, color=random.choice(COLORS))
+                self.calcScore(new_brick)
+            elif i < 32/4+16:
+                new_brick = Brick((i-15) * WIDTH/10+40, HEIGHT/4+20, color=random.choice(COLORS))
+                self.calcScore(new_brick)
+            elif i < 32/4+24:
+                new_brick = Brick((i-23) * WIDTH/10+40, HEIGHT/4+50, color=random.choice(COLORS))
+                self.calcScore(new_brick)
 
             bricks.add(new_brick)
-            all_sprites.add(new_brick)

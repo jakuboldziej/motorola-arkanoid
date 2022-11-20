@@ -8,15 +8,16 @@ from pygame.locals import (
     K_SPACE,
 )
 from os import path
+import random
 
 BASEDIR = path.dirname(path.realpath(__file__))
 
 CURRENTLEVEL = 1
 BRICKAMOUNT = 16
-FPS = 60
 SCORE = 0
 WINSCORE = 0
 PREVSCORE = 0
+FPS = 60
 clock = pygame.time.Clock()
 playing = False
 

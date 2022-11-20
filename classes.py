@@ -5,7 +5,7 @@ pygame.init()
 font = pygame.font.Font(pygame.font.get_default_font(), 32)
 
 class Button():
-    def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, onePress=False):
+    def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, onePress=True):
         self.x = x
         self.y = y
         self.width = width
@@ -55,13 +55,15 @@ class Button():
 class Platform(pygame.sprite.Sprite):
     def __init__(self):
         super(Platform, self).__init__()
+        self.x = WIDTH/2
+        self.y = HEIGHT-25
         self.surf = pygame.Surface((100, 25))
         self.surf.fill(WHITE)
         self.speed = 7
-        self.x = WIDTH/2
-        self.y = HEIGHT-25
         self.rect = self.surf.get_rect(center=((self.x, self.y)))
         self.platformDirection = "center"
+        self.currentPowerUp = None
+        self.lifes = 3
 
     def update(self, pressed_keys):
         if pressed_keys[K_LEFT]:
@@ -95,6 +97,9 @@ class Platform(pygame.sprite.Sprite):
         elif self.rect.right >= WIDTH:
             self.rect.right = WIDTH
 
+    def draw(self):
+        pygame.draw.rect(display, WHITE, pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
+
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         super(Ball, self).__init__()
@@ -120,11 +125,12 @@ class Ball(pygame.sprite.Sprite):
             self.direction = "right,up"
             self.directionX = 0
             self.directionY = 0
-            ball.rect[0] = platform.rect[0] + 45
+            ball.rect[0] = platform.rect[0] + platform.rect[2]/2 - ball.rect[2]/2
             ball.rect[1] = platform.rect[1] - 25
         else:
             if self.rect.bottom >= WIDTH - 180:
                 ball.stick = True
+                platform.lifes -= 1
             elif self.rect.top < 0:
                 self.directionY = +self.speedY
                 self.direction = self.direction.split(",")[0] +",down"
@@ -146,7 +152,6 @@ class Brick(pygame.sprite.Sprite):
         self.health = 1
         self.value = color[1]
         self.surf = pygame.Surface((80, 30))
-        self.surf.fill(color[0])
         self.rect = self.surf.get_rect(center=(x, y))
 
         if self.color in COLORFUL:
@@ -159,12 +164,17 @@ class Brick(pygame.sprite.Sprite):
         else:
             self.health = -1
 
+    def draw(self):
+        pygame.draw.rect(display, self.color[0], pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
+        pygame.draw.rect(display, WHITE, pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]), 1)
+
 class PowerUp(pygame.sprite.Sprite):
     def __init__(self, x, y, color):
         super(PowerUp, self).__init__()
         self.x = x
         self.y = y
         self.color = color
+        self.typeList = ["longerPlatform", "moreBalls", "strongerHit", "extraLife", "laser", "catchingMode"]
         self.speed = 3
         self.surf = pygame.Surface((80, 80))
         self.surf.fill(color)
@@ -172,11 +182,112 @@ class PowerUp(pygame.sprite.Sprite):
 
     def update(self):
         self.rect[1] += self.speed
+    
+    def restartBoosts(self):
+        platform.rect[2] = 100
+
+    def boost(self):
+        self.restartBoosts()
+        boostType = random.choice(self.typeList)
+        if boostType == "longerPlatform":
+            platform.rect[2] = 150
+            platform.currentPowerUp = "longerPlatform"
+        elif boostType == "moreBalls":
+            platform.currentPowerUp = "moreBalls"
+        elif boostType == "strongerHit":
+            platform.currentPowerUp = "strongerHit"
+        elif boostType == "extraLife":
+            platform.lifes += 1
+            platform.currentPowerUp = "extraLife"
+        elif boostType == "laser":
+            platform.currentPowerUp = "laser"
+        elif boostType == "catchingMode":
+            platform.currentPowerUp = "catchingMode"
+        print(boostType)
+
+class Mouse(pygame.sprite.Sprite):
+    def __init__(self):
+        super(Mouse, self).__init__()
+        self.pos = pygame.mouse.get_pos()
+        self.surf = pygame.Surface((0.1, 0.1))
+        self.surf.fill(WHITE)
+        self.rect = self.surf.get_rect(center=(self.pos[0], self.pos[1]))
+        self.choosingColor = SILVER[0]
+
+class Editor:
+    def __init__(self):
+        super(Editor, self).__init__()
+        self.width = WIDTH
+        self.height = HEIGHT - 400
+        self.surf = pygame.Surface((self.width, self.height))
+        self.surf.fill(WHITE)
+        self.rect = self.surf.get_rect(center=(WIDTH/2, 0))
+
+editingGridBlockArray = []
+class GridBlock(pygame.sprite.Sprite):
+    def __init__(self, x, y, choosingGridBlock=False, color=WHITE, id=0):
+        super(GridBlock, self).__init__()
+        self.id = id
+        self.x = x
+        self.y = y
+        self.choosingGridBlock = choosingGridBlock
+        self.width = 80
+        self.height = 30
+        self.color = color
+        self.surf = pygame.Surface((self.width, self.height))
+        self.rect = pygame.Rect(x, y, self.width, self.height)
+        self.clicked = False
+        self.selected = False
+
+    def draw(self):
+        if not self.choosingGridBlock:
+            if not self.selected:
+                pygame.draw.rect(display, self.color, pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]), 1)
+            else:
+                pygame.draw.rect(display, self.color, pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
+                pygame.draw.rect(display, WHITE, pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]), 1)
+        else:
+            pygame.draw.rect(display, self.color, pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
+            
+    def process(self):
+        mousePos = pygame.mouse.get_pos()
+        gridBlockCollision = self.rect.collidepoint(mousePos[0], mousePos[1])
+        if gridBlockCollision:
+            if not self.choosingGridBlock:
+                self.surf.fill(mouse.choosingColor)
+            else:
+                self.surf.fill(self.color)
+            
+            if pygame.mouse.get_pressed(num_buttons=3)[0]:
+                if not self.clicked:
+                    self.clicked = True
+                    if not self.choosingGridBlock:
+                        if not self.selected:
+                            self.color = mouse.choosingColor
+                            self.selected = True
+                            editingGridBlockArray.append(self)
+                        else:
+                            self.color = WHITE
+                            self.selected = False
+                            editingGridBlockArray.remove(self)
+                        print(self.id)
+                    else:
+                        if not self.selected:
+                            mouse.choosingColor = self.color
+                            self.selected = True
+                        else:
+                            self.selected = False
+            else:
+                self.clicked = False
+            display.blit(self.surf, self.rect)
 
 platform = Platform()
 ball = Ball()
+mouse = Mouse()
 
 bricks = pygame.sprite.Group()
+# balls = pygame.sprite.Group()
 powerUps = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 # all_sprites.add(ball)
+
