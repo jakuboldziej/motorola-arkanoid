@@ -1,5 +1,7 @@
 from classes import *
 
+from ast import literal_eval
+
 class Level:
     def __init__(self):
         super(Level, self).__init__()
@@ -7,25 +9,33 @@ class Level:
         self.brickArray = []
     
     def calcScore(self, brick):
-        if brick.color in COLORFUL: 
-            if brick.color == SILVER:
-                self.winscore += brick.color[1] * CURRENTLEVEL
-            else:
-                self.winscore += brick.color[1]
+        if brick.color in COLORFUL:
+            self.winscore += brick.value
 
     def draw(self):
-        for i in range(32):
-            if i < 32/4:
-                new_brick = Brick(i * WIDTH/10+120, HEIGHT/4-40, color=random.choice(COLORS))
-                self.calcScore(new_brick)
-            # elif i < 32/4+8:
-            #     new_brick = Brick((i-7) * WIDTH/10+40, HEIGHT/4-10, color=random.choice(COLORS))
-            #     self.calcScore(new_brick)
-            # elif i < 32/4+16:
-            #     new_brick = Brick((i-15) * WIDTH/10+40, HEIGHT/4+20, color=random.choice(COLORS))
-            #     self.calcScore(new_brick)
-            # elif i < 32/4+24:
-            #     new_brick = Brick((i-23) * WIDTH/10+40, HEIGHT/4+50, color=random.choice(COLORS))
-            #     self.calcScore(new_brick)
+        with open("levels.json", "r+") as f:
+            data = json.load(f)
+            levels = data["levels"]
+        for level in levels:
+            levelId = level["levelId"]
+            if int(levelId) == platform.currentLevel:
+                gridArray = level["gridArray"]
+                self.brickArray = gridArray
+        
 
-            bricks.add(new_brick)
+        startingY = 30*3
+        startingX = 0
+        brickCount = ROWCOUNT*10
+        for i, brick in enumerate(gridArray):
+            if i%10==0 and i != 0:
+                    startingX -= WIDTH
+                    startingY += 30
+
+            if brick[f"{i+1}"] == 1:
+                for color in COLORS:
+                    if literal_eval(brick["color"]) == color[0]:
+                        brickColor = color
+
+                newBrick = Brick(startingX+i*80, startingY, color=brickColor)
+                self.calcScore(newBrick)
+                bricks.add(newBrick)

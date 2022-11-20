@@ -1,31 +1,28 @@
 from level import *
 from editor import *
 
-import json
-
 pygame.init()
 
 font = pygame.font.Font(pygame.font.get_default_font(), 32)
 
 # Level management
 def loadlevels():
-    global WINSCORE, BRICKAMOUNT, level, playing
+    global level, playing
     level = Level()
     level.draw()
-    WINSCORE = level.winscore
-    # BRICKAMOUNT += 8
-    print(CURRENTLEVEL, WINSCORE, PREVSCORE, SCORE)
+    # print(platform.currentLevel, level.winscore, PREVSCORE, SCORE)
     playing = True
     main()
 
 def loadNextLevel():
-    global CURRENTLEVEL, PREVSCORE, bricks
-    CURRENTLEVEL += 1
+    global PREVSCORE, bricks, platform
+    platform.currentLevel += 1
     PREVSCORE += level.winscore
+    level.winscore = 0
     ball.stick = True
     for brick in bricks:
         brick.kill()
-    print("next level", CURRENTLEVEL)
+    print("next level", platform.currentLevel)
     loadlevels()
 
 # Collisions
@@ -82,13 +79,13 @@ def manageCollisions():
         if brick.health == 0:
             global SCORE
             brick.kill()
-            # print(SCORE, PREVSCORE, CURRENTLEVEL * 1000)
-            if brick.color != SILVER and SCORE > CURRENTLEVEL * 2000:
+            # print(SCORE, PREVSCORE, platform.currentLevel * 1000)
+            if brick.color != SILVER and SCORE > platform.currentLevel * 2000:
                 powerUp = PowerUp(brick.rect[0] + brick.rect[2]/2, brick.rect[1] + brick.rect[3]*2, brick.color[0])
                 powerUps.add(powerUp)
 
             SCORE += brick.value
-            if SCORE == WINSCORE + PREVSCORE:
+            if SCORE - PREVSCORE == level.winscore:
                 loadNextLevel()
 
     # Platform - PowerUp Collision
@@ -100,11 +97,12 @@ def manageCollisions():
 # Drawing and updating
 def drawText():
     text1 = font.render('Score: ' + str(SCORE), True, (0, 255, 0))
-    text2 = font.render('Level: ' + str(CURRENTLEVEL), True, (0, 255, 0))
+    text2 = font.render('Level: ' + str(platform.currentLevel), True, (0, 255, 0))
     text3 = font.render('Lifes: ' + str(platform.lifes), True, (0, 255, 0))
     display.blit(text1, (10, 10))
     display.blit(text2, (WIDTH-150, 10))
     display.blit(text3, (10, 50))
+    # print(platform.currentLevel, SCORE, PREVSCORE, level.winscore)
 
 def drawWindow():
     display.blit(background, (0, 0))
@@ -134,15 +132,15 @@ def updateEntites():
     ball.update()
 
 def restartBall():
-    platform.rect.x = WIDTH/2
-    platform.rect.y = HEIGHT-25
+    platform.rect.x = WIDTH/2-50
+    platform.rect.y = HEIGHT-45
     ball.stick = True
     main()
 
 def manageLifes():
-    global CURRENTLEVEL, SCORE, PREVSCORE
+    global SCORE, PREVSCORE
     if platform.lifes == 0:
-        CURRENTLEVEL = 1
+        platform.currentLevel = 1
         SCORE = 0
         PREVSCORE = 0
         platform.rect[2] = 100
@@ -152,20 +150,20 @@ def manageLifes():
 def howToPlay():
     running = True
     while running:
-        display.fill(BLACK)
+        display.fill(BLACK[0])
         for event in pygame.event.get():
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
-                    mainMenu()
                     running = False
+                    mainMenu()
             if event.type == QUIT:
                 quit()
 
-        text1 = font.render('You can move platform by pressing', True, WHITE)
-        text2 = font.render('arrow keys on your beyboard.', True, WHITE)
-        text3 = font.render('Press spacebar to release the ball.', True, WHITE)
-        text4 = font.render('Press escape to stop the game.', True, WHITE)
-        text5 = font.render('Brick values:', True, WHITE)
+        text1 = font.render('You can move platform by pressing', True, WHITE[0])
+        text2 = font.render('arrow keys on your beyboard.', True, WHITE[0])
+        text3 = font.render('Press spacebar to release the ball.', True, WHITE[0])
+        text4 = font.render('Press escape to stop the game.', True, WHITE[0])
+        text5 = font.render('Brick values:', True, WHITE[0])
         values = pygame.image.load(path.join(BASEDIR, "images/values.png")).convert()
         display.blit(values, (57, 50))
         display.blit(text1, (WIDTH/6, HEIGHT/3 - 10))
@@ -182,12 +180,12 @@ def howToPlay():
 def settings():
     running = True
     while running:
-        display.fill(BLACK)
+        display.fill(BLACK[0])
         for event in pygame.event.get():
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
-                    mainMenu()
                     running = False
+                    mainMenu()
             if event.type == QUIT:
                 quit()
 
@@ -197,36 +195,22 @@ def settings():
         pygame.display.flip()
         clock.tick(FPS)
                 
-def saveEditor():
-    print(editingGridBlockArray)
-    with open("levels.json", "r+") as f:
-        level = json.loads(f.readlines()[0])
-        # levelsJson.append(f.readlines()[0])
-    
-    level["level"]["gridArray"] = editingGridBlockArray
-    level = json.dumps(level)
-
-    with open('levels.json', 'w+') as file:
-        file.write(level)
-
-    # print(levelsJson)
-
 def editor():
+    # inputBox = InputBox(300, 0, 50, 32)
     running = True
     while running:
         global mouse
         mouse = Mouse()
-        display.fill(BLACK)
+        display.fill(BLACK[0])
         for event in pygame.event.get():
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
-                    mainMenu()
                     running = False
+                    mainMenu()
             if event.type == QUIT:
                 quit()
+            # inputBox.handle_event(event)
 
-        # editor = Editor()
-        # display.blit(editor.surf, editor.rect)
         for gridBlock in gridBlocks:
             gridBlock.draw()
             gridBlock.process()
@@ -236,9 +220,12 @@ def editor():
             choosingGridBlock.process()
 
         button1 = Button(WIDTH/2-75, HEIGHT/1.2, 150, 60, buttonText="Back", onclickFunction=mainMenu)
+        global button2
         button2 = Button(3, HEIGHT-63, 150, 60, buttonText="Save", onclickFunction=saveEditor)
         button1.process()
         button2.process()
+
+        # inputBox.draw(display)
 
         pygame.display.flip()
         clock.tick(FPS)
@@ -246,7 +233,7 @@ def editor():
 def mainMenu():
     running = True
     while running:
-        display.fill(BLACK)
+        display.fill(BLACK[0])
         for event in pygame.event.get():
             if event.type == QUIT:
                 quit()
@@ -279,23 +266,40 @@ def main():
         for event in pygame.event.get():
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
-                    mainMenu()
                     running = False
+                    mainMenu()
             elif event.type == QUIT:
                 running = False
+                quit()
 
         drawWindow()
         updateEntites()
         manageCollisions()
 
-        debugging()
-
         clock.tick(FPS)
 
-def debugging():
-    # print("PLATFORM", platform.rect[0], platform.rect[1])
-    # print("BALL", ball.directionX, ball.directionY)
-    # print(ball.direction)
-    pass
+# Utils
+def saveEditor():
+    with open("editorLevels.json", "r+") as f:
+        data = json.load(f)
+        levels = data["levels"]
+
+    if levels:
+        lastLevelId = data["levels"][-1]["levelId"]
+    else:
+        lastLevelId = 0
+    
+    new_level = {"levelId": int(lastLevelId)+1, "gridArray": editorClass.editingGridBlockArray}
+    levels.append(new_level)
+    jsonLevels = json.dumps(data, indent=1)
+    with open('editorLevels.json', "w") as f:
+        f.write(str(jsonLevels))
+
+    for gridBlock in gridBlocks:
+        gridBlock.selected = False
+        gridBlock.color = WHITE
+
+    editorClass.resetArray()
+    mainMenu()
 
 mainMenu()

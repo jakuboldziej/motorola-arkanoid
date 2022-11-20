@@ -9,21 +9,20 @@ from pygame.locals import (
 )
 from os import path
 import random
+import json
 
 BASEDIR = path.dirname(path.realpath(__file__))
 
-CURRENTLEVEL = 1
-BRICKAMOUNT = 16
+ROWCOUNT = 5
 SCORE = 0
-WINSCORE = 0
 PREVSCORE = 0
 FPS = 60
 clock = pygame.time.Clock()
 playing = False
 
 # Colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
+BLACK = ((0, 0, 0), 0)
+WHITE = ((255, 255, 255), 0)
 SILVER = ((209, 208, 207), 50)
 ORANGE = ((199, 88, 2), 60)
 AQUA = ((87, 228, 250), 70)
@@ -42,4 +41,4 @@ display = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Arkanoid')
 
 background = pygame.Surface(display.get_size())
-background.fill(BLACK)
+background.fill(BLACK[0])

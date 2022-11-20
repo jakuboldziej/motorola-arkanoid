@@ -5,7 +5,7 @@ pygame.init()
 font = pygame.font.Font(pygame.font.get_default_font(), 32)
 
 class Button():
-    def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, onePress=True):
+    def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, onePress=False):
         self.x = x
         self.y = y
         self.width = width
@@ -37,11 +37,12 @@ class Button():
                 self.buttonSurface.fill(self.fillColors['pressed'])
                 if not self.clicked:
                     self.clicked = True
-                    if not self.alreadyPressed:
-                        self.alreadyPressed = True
+                    if self.onePress:
                         self.onclickFunction()
-                    else:
-                        self.alreadyPressed = False
+
+                    elif not self.alreadyPressed:
+                        self.onclickFunction()
+                        self.alreadyPressed = True
             else:
                 self.clicked = False
 
@@ -51,18 +52,51 @@ class Button():
         ])
         display.blit(self.buttonSurface, self.buttonRect)
 
+COLOR_INACTIVE = pygame.Color('lightskyblue3')
+COLOR_ACTIVE = pygame.Color('dodgerblue2')
+class InputBox:
+    def __init__(self, x, y, w, h, text=''):
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color = COLOR_INACTIVE
+        self.text = text
+        self.txt_surface = font.render(text, True, self.color)
+        self.active = False
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                self.active = not self.active
+            else:
+                self.active = False
+            self.color = COLOR_ACTIVE if self.active else COLOR_INACTIVE
+        if event.type == pygame.KEYDOWN:
+            if self.active:
+                if event.key == pygame.K_RETURN:
+                    print(self.text)
+                    self.text = ''
+                elif event.key == pygame.K_BACKSPACE:
+                    self.text = self.text[:-1]
+                else:
+                    self.text += event.unicode
+                self.txt_surface = font.render(self.text, True, self.color)
+
+    def draw(self, screen):
+        screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+        pygame.draw.rect(screen, self.color, self.rect, 2)
+
 class Platform(pygame.sprite.Sprite):
     def __init__(self):
         super(Platform, self).__init__()
         self.x = WIDTH/2
         self.y = HEIGHT-25
         self.surf = pygame.Surface((100, 25))
-        self.surf.fill(WHITE)
+        self.surf.fill(WHITE[0])
         self.speed = 7
         self.rect = self.surf.get_rect(center=((self.x, self.y)))
         self.platformDirection = "center"
         self.currentPowerUp = None
         self.lifes = 3
+        self.currentLevel = 1
 
     def update(self, pressed_keys):
         if pressed_keys[K_LEFT]:
@@ -97,16 +131,16 @@ class Platform(pygame.sprite.Sprite):
             self.rect.right = WIDTH
 
     def draw(self):
-        pygame.draw.rect(display, WHITE, pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
+        pygame.draw.rect(display, WHITE[0], pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
 
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         super(Ball, self).__init__()
         # self.surf = pygame.Surface((11, 11))
-        # self.surf.fill(WHITE)
+        # self.surf.fill(WHITE[0])
         # self.rect = self.surf.get_rect(center=(WIDTH/2, HEIGHT - 55))
         self.radius = 9
-        self.rect = pygame.draw.circle(display, WHITE, (5, 5), 8)
+        self.rect = pygame.draw.circle(display, WHITE[0], (5, 5), 8)
         self.speed = 6
         self.speedX = self.speed
         self.speedY = self.speed
@@ -116,8 +150,8 @@ class Ball(pygame.sprite.Sprite):
         self.direction = "0,up"
     
     def draw(self):
-        pygame.draw.circle(display, WHITE, (self.rect[0] + 7, self.rect[1] + 7), self.radius)
-        # pygame.draw.rect(display, WHITE, pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
+        pygame.draw.circle(display, WHITE[0], (self.rect[0] + 7, self.rect[1] + 7), self.radius)
+        # pygame.draw.rect(display, WHITE[0], pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
 
     def update(self):
         if ball.stick:
@@ -148,26 +182,28 @@ class Brick(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.color = color
+        self.width = 80
+        self.height = 30
         self.health = 1
-        self.surf = pygame.Surface((80, 30))
-        self.rect = self.surf.get_rect(center=(x, y))
+        self.surf = pygame.Surface((self.width, self.height))
+        self.rect = pygame.Rect(x, y, self.width, self.height)
 
         if self.color in COLORFUL:
-            self.health = 1
             if self.color == SILVER:
+                self.value = color[1] * platform.currentLevel
                 self.health = 2
-                self.value = color[1] * CURRENTLEVEL
-                for i in range(CURRENTLEVEL+1):
+                for i in range(platform.currentLevel+1):
                     if i % 8 == 0 and i != 0:
                         self.health += 1
             else:
+                self.health = 1
                 self.value = color[1]
         else:
             self.health = -1
 
     def draw(self):
         pygame.draw.rect(display, self.color[0], pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
-        pygame.draw.rect(display, WHITE, pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]), 1)
+        pygame.draw.rect(display, WHITE[0], pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]), 1)
 
 class PowerUp(pygame.sprite.Sprite):
     def __init__(self, x, y, color):
@@ -211,22 +247,21 @@ class Mouse(pygame.sprite.Sprite):
         super(Mouse, self).__init__()
         self.pos = pygame.mouse.get_pos()
         self.surf = pygame.Surface((0.1, 0.1))
-        self.surf.fill(WHITE)
+        self.surf.fill(WHITE[0])
         self.rect = self.surf.get_rect(center=(self.pos[0], self.pos[1]))
-        self.choosingColor = SILVER[0]
+        self.choosingColor = SILVER
 
-class Editor:
+class Editor(pygame.sprite.Sprite):
     def __init__(self):
         super(Editor, self).__init__()
-        self.width = WIDTH
-        self.height = HEIGHT - 400
-        self.surf = pygame.Surface((self.width, self.height))
-        self.surf.fill(WHITE)
-        self.rect = self.surf.get_rect(center=(WIDTH/2, 0))
+        self.editingGridBlockArray = []
+        self.resetArray()
 
-editingGridBlockArray = []
-for i in range(40):
-    editingGridBlockArray.append({f"{i+1}": 0})
+    def resetArray(self):
+        self.editingGridBlockArray = []
+        for i in range(ROWCOUNT*10):
+            self.editingGridBlockArray.append({f"{i+1}": 0})
+
 class GridBlock(pygame.sprite.Sprite):
     def __init__(self, x, y, choosingGridBlock=False, color=WHITE, id=0):
         super(GridBlock, self).__init__()
@@ -245,21 +280,21 @@ class GridBlock(pygame.sprite.Sprite):
     def draw(self):
         if not self.choosingGridBlock:
             if not self.selected:
-                pygame.draw.rect(display, self.color, pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]), 1)
+                pygame.draw.rect(display, self.color[0], pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]), 1)
             else:
-                pygame.draw.rect(display, self.color, pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
-                pygame.draw.rect(display, WHITE, pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]), 1)
+                pygame.draw.rect(display, self.color[0], pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
+                pygame.draw.rect(display, WHITE[0], pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]), 1)
         else:
-            pygame.draw.rect(display, self.color, pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
+            pygame.draw.rect(display, self.color[0], pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
             
     def process(self):
         mousePos = pygame.mouse.get_pos()
         gridBlockCollision = self.rect.collidepoint(mousePos)
         if gridBlockCollision:
             if not self.choosingGridBlock:
-                self.surf.fill(mouse.choosingColor)
+                self.surf.fill(mouse.choosingColor[0])
             else:
-                self.surf.fill(self.color)
+                self.surf.fill(self.color[0])
             
             if pygame.mouse.get_pressed(num_buttons=3)[0]:
                 if not self.clicked:
@@ -274,7 +309,6 @@ class GridBlock(pygame.sprite.Sprite):
                             self.color = WHITE
                             self.selected = False
                             self.manageArray(append=False)
-                        print(self.id)
                     else:
                         if not self.selected:
                             mouse.choosingColor = self.color
@@ -287,10 +321,12 @@ class GridBlock(pygame.sprite.Sprite):
 
     def manageArray(self, append):
         if append:
-            editingGridBlockArray[self.id-1] = {f"{self.id}": 1}
+            editorClass.editingGridBlockArray[self.id-1] = {f"{self.id}": 1, "color": str(self.color[0])}
         else:
-            editingGridBlockArray[self.id-1] = {f"{self.id}": 0}
+            editorClass.editingGridBlockArray[self.id-1] = {f"{self.id}": 0}
 
+
+editorClass = Editor()
 platform = Platform()
 ball = Ball()
 mouse = Mouse()
