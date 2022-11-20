@@ -24,7 +24,7 @@ playing = False
 # Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-SILVER = ((209, 208, 207), 50 * CURRENTLEVEL)
+SILVER = ((209, 208, 207), 50)
 ORANGE = ((199, 88, 2), 60)
 AQUA = ((87, 228, 250), 70)
 GREEN = ((5, 255, 80), 80)

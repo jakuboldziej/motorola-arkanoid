@@ -24,6 +24,7 @@ class Button():
 
         self.buttonSurf = font.render(buttonText, True, (20, 20, 20))
 
+        self.clicked = False
         self.alreadyPressed = False
 
     def process(self):
@@ -32,19 +33,17 @@ class Button():
         self.buttonSurface.fill(self.fillColors['normal'])
         if self.buttonRect.collidepoint(mousePos):
             self.buttonSurface.fill(self.fillColors['hover'])
-
             if pygame.mouse.get_pressed(num_buttons=3)[0]:
                 self.buttonSurface.fill(self.fillColors['pressed'])
-
-                if self.onePress:
-                    self.onclickFunction()
-
-                elif not self.alreadyPressed:
-                    self.onclickFunction()
-                    self.alreadyPressed = True
-
+                if not self.clicked:
+                    self.clicked = True
+                    if not self.alreadyPressed:
+                        self.alreadyPressed = True
+                        self.onclickFunction()
+                    else:
+                        self.alreadyPressed = False
             else:
-                self.alreadyPressed = False
+                self.clicked = False
 
         self.buttonSurface.blit(self.buttonSurf, [
             self.buttonRect.width/2 - self.buttonSurf.get_rect().width/2,
@@ -150,7 +149,6 @@ class Brick(pygame.sprite.Sprite):
         self.y = y
         self.color = color
         self.health = 1
-        self.value = color[1]
         self.surf = pygame.Surface((80, 30))
         self.rect = self.surf.get_rect(center=(x, y))
 
@@ -158,9 +156,12 @@ class Brick(pygame.sprite.Sprite):
             self.health = 1
             if self.color == SILVER:
                 self.health = 2
+                self.value = color[1] * CURRENTLEVEL
                 for i in range(CURRENTLEVEL+1):
                     if i % 8 == 0 and i != 0:
                         self.health += 1
+            else:
+                self.value = color[1]
         else:
             self.health = -1
 
@@ -224,6 +225,8 @@ class Editor:
         self.rect = self.surf.get_rect(center=(WIDTH/2, 0))
 
 editingGridBlockArray = []
+for i in range(40):
+    editingGridBlockArray.append({f"{i+1}": 0})
 class GridBlock(pygame.sprite.Sprite):
     def __init__(self, x, y, choosingGridBlock=False, color=WHITE, id=0):
         super(GridBlock, self).__init__()
@@ -251,7 +254,7 @@ class GridBlock(pygame.sprite.Sprite):
             
     def process(self):
         mousePos = pygame.mouse.get_pos()
-        gridBlockCollision = self.rect.collidepoint(mousePos[0], mousePos[1])
+        gridBlockCollision = self.rect.collidepoint(mousePos)
         if gridBlockCollision:
             if not self.choosingGridBlock:
                 self.surf.fill(mouse.choosingColor)
@@ -263,13 +266,14 @@ class GridBlock(pygame.sprite.Sprite):
                     self.clicked = True
                     if not self.choosingGridBlock:
                         if not self.selected:
+                            # Creating brick on gridBlock
                             self.color = mouse.choosingColor
                             self.selected = True
-                            editingGridBlockArray.append(self)
+                            self.manageArray(append=True)
                         else:
                             self.color = WHITE
                             self.selected = False
-                            editingGridBlockArray.remove(self)
+                            self.manageArray(append=False)
                         print(self.id)
                     else:
                         if not self.selected:
@@ -281,6 +285,12 @@ class GridBlock(pygame.sprite.Sprite):
                 self.clicked = False
             display.blit(self.surf, self.rect)
 
+    def manageArray(self, append):
+        if append:
+            editingGridBlockArray[self.id-1] = {f"{self.id}": 1}
+        else:
+            editingGridBlockArray[self.id-1] = {f"{self.id}": 0}
+
 platform = Platform()
 ball = Ball()
 mouse = Mouse()
@@ -290,4 +300,3 @@ bricks = pygame.sprite.Group()
 powerUps = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 # all_sprites.add(ball)
-

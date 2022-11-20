@@ -14,15 +14,6 @@ for i in range(gridBlocksAmount):
 
     gridBlocks.add(newGridBlock)
 
-lista = [
-    [{"1": "asdf"}{"2": "asdf"}{"3": "asdf"}{"4": "asdf"}{"5": "asdf"}],
-    [],
-    [],
-    [],
-    [],
-
-]
-
 choosingGridBlockHeight = HEIGHT/1.3 - 10
 choosingGridBlocks = pygame.sprite.Group()
 silverGridBlock = GridBlock(WIDTH/13, choosingGridBlockHeight, choosingGridBlock=True, color=SILVER[0])

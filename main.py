@@ -1,6 +1,8 @@
 from level import *
 from editor import *
 
+import json
+
 pygame.init()
 
 font = pygame.font.Font(pygame.font.get_default_font(), 32)
@@ -12,7 +14,7 @@ def loadlevels():
     level.draw()
     WINSCORE = level.winscore
     # BRICKAMOUNT += 8
-    # print(CURRENTLEVEL, WINSCORE, PREVSCORE)
+    print(CURRENTLEVEL, WINSCORE, PREVSCORE, SCORE)
     playing = True
     main()
 
@@ -23,7 +25,7 @@ def loadNextLevel():
     ball.stick = True
     for brick in bricks:
         brick.kill()
-    # print("next level", CURRENTLEVEL)
+    print("next level", CURRENTLEVEL)
     loadlevels()
 
 # Collisions
@@ -195,6 +197,20 @@ def settings():
         pygame.display.flip()
         clock.tick(FPS)
                 
+def saveEditor():
+    print(editingGridBlockArray)
+    with open("levels.json", "r+") as f:
+        level = json.loads(f.readlines()[0])
+        # levelsJson.append(f.readlines()[0])
+    
+    level["level"]["gridArray"] = editingGridBlockArray
+    level = json.dumps(level)
+
+    with open('levels.json', 'w+') as file:
+        file.write(level)
+
+    # print(levelsJson)
+
 def editor():
     running = True
     while running:
@@ -220,7 +236,7 @@ def editor():
             choosingGridBlock.process()
 
         button1 = Button(WIDTH/2-75, HEIGHT/1.2, 150, 60, buttonText="Back", onclickFunction=mainMenu)
-        button2 = Button(3, HEIGHT-63, 150, 60, buttonText="Save", onclickFunction=mainMenu)
+        button2 = Button(3, HEIGHT-63, 150, 60, buttonText="Save", onclickFunction=saveEditor)
         button1.process()
         button2.process()
 
