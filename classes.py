@@ -12,6 +12,7 @@ class Button():
         self.height = height
         self.onclickFunction = onclickFunction
         self.onePress = onePress
+        self.buttonText = buttonText
 
         self.fillColors = {
             'normal': '#ffffff',
@@ -22,7 +23,7 @@ class Button():
         self.buttonSurface = pygame.Surface((self.width, self.height))
         self.buttonRect = pygame.Rect(self.x, self.y, self.width, self.height)
 
-        self.buttonSurf = font.render(buttonText, True, (20, 20, 20))
+        self.buttonSurf = font.render(self.buttonText, True, (20, 20, 20))
 
         self.clicked = False
         self.alreadyPressed = False
@@ -37,12 +38,12 @@ class Button():
                 self.buttonSurface.fill(self.fillColors['pressed'])
                 if not self.clicked:
                     self.clicked = True
-                    if self.onePress:
+                    if not self.alreadyPressed:
                         self.onclickFunction()
-
-                    elif not self.alreadyPressed:
-                        self.onclickFunction()
+                        # print("clicked")
                         self.alreadyPressed = True
+                    else:
+                        self.alreadyPressed = False
             else:
                 self.clicked = False
 
@@ -51,6 +52,7 @@ class Button():
             self.buttonRect.height/2 - self.buttonSurf.get_rect().height/2
         ])
         display.blit(self.buttonSurface, self.buttonRect)
+        
 
 COLOR_INACTIVE = pygame.Color('lightskyblue3')
 COLOR_ACTIVE = pygame.Color('dodgerblue2')
@@ -99,52 +101,45 @@ class Platform(pygame.sprite.Sprite):
         self.currentLevel = 1
 
     def update(self, pressed_keys):
-        mousePos = pygame.mouse.get_pos()
-        # print(platform.platformDirection, self.rect.x)
-        self.rect.x = mousePos[0] - self.rect.width/2
-        if self.rect.x > WIDTH - self.rect.width:
-            self.rect.x = WIDTH - self.rect.width
-        elif self.rect.x < 0:
-            self.rect.x = 0
+        if settings.steeringType == "mouse":
+            mousePos = pygame.mouse.get_pos()
+            self.rect.x = mousePos[0] - self.rect.width/2
+        else:
+            if pressed_keys[K_LEFT]:
+                self.rect.move_ip(-self.speed, 0)
+                # self.rect[0] -= 5
+                self.platformDirection = "left"
+            elif pressed_keys[K_RIGHT]:
+                self.rect.move_ip(+self.speed, 0)
+                # self.rect[0] += 5
+                self.platformDirection = "right"
+            else:
+                self.platformDirection = "center"
+            if ball.stick == True and ball.rect[1] < WIDTH - 200:
+                if pressed_keys[K_SPACE]:
+                    ball.stick = False
+                    if self.platformDirection == "left":
+                        ball.directionX = -ball.speedX
+                        ball.directionY = -ball.speedY
+                        ball.direction = "left," + ball.direction.split(",")[1]
+                    elif self.platformDirection == "right":
+                        ball.directionX = +ball.speedX
+                        ball.directionY = -ball.speedY
+                        ball.direction = "right," + ball.direction.split(",")[1]
+                    else:
+                        ball.directionX = 0
+                        ball.directionY = -ball.speedY
+                        ball.direction = "0," + ball.direction.split(",")[1]
 
-        
-        # if pressed_keys[K_LEFT]:
-        #     self.rect.move_ip(-self.speed, 0)
-        #     # self.rect[0] -= 5
-        #     self.platformDirection = "left"
-        # elif pressed_keys[K_RIGHT]:
-        #     self.rect.move_ip(+self.speed, 0)
-        #     # self.rect[0] += 5
-        #     self.platformDirection = "right"
-        # else:
-        #     self.platformDirection = "center"
-        # if ball.stick == True and ball.rect[1] < WIDTH - 200:
-        #     if pressed_keys[K_SPACE]:
-        #         ball.stick = False
-        #         if self.platformDirection == "left":
-        #             ball.directionX = -ball.speedX
-        #             ball.directionY = -ball.speedY
-        #             ball.direction = "left," + ball.direction.split(",")[1]
-        #         elif self.platformDirection == "right":
-        #             ball.directionX = +ball.speedX
-        #             ball.directionY = -ball.speedY
-        #             ball.direction = "right," + ball.direction.split(",")[1]
-        #         else:
-        #             ball.directionX = 0
-        #             ball.directionY = -ball.speedY
-        #             ball.direction = "0," + ball.direction.split(",")[1]
-
-        # if self.rect.left <= 0:
-        #     self.rect.left = 0
-        # elif self.rect.right >= WIDTH:
-        #     self.rect.right = WIDTH
+        if self.rect.left <= 0:
+            self.rect.left = 0
+        elif self.rect.right >= WIDTH:
+            self.rect.right = WIDTH
 
     def draw(self):
         pygame.draw.rect(display, WHITE[0], pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
 
     def releaseBall(self):
-        print("release")
-        print(self.platformDirection)
         if self.platformDirection == "left":
             print(ball.directionX)
             ball.directionX = -ball.speedX
@@ -187,7 +182,7 @@ class Ball(pygame.sprite.Sprite):
             ball.rect[0] = platform.rect[0] + platform.rect[2]/2 - ball.rect[2]/2
             ball.rect[1] = platform.rect[1] - 25
         else:
-            if self.rect.bottom >= WIDTH - 180:
+            if self.rect.bottom >= HEIGHT:
                 ball.stick = True
                 platform.lifes -= 1
             elif self.rect.top < 0:
@@ -327,20 +322,18 @@ class GridBlock(pygame.sprite.Sprite):
 
     def manageArray(self, append):
         if append:
-            editorClass.editingGridBlockArray[self.id-1] = {f"{self.id}": 1, "color": str(self.color[0])}
+            editorClass.editingGridBlockArray[self.id] =  str(self.color[0])
         else:
-            editorClass.editingGridBlockArray[self.id-1] = {f"{self.id}": 0}
+            editorClass.editingGridBlockArray.pop(self.id)
 
 class Editor(pygame.sprite.Sprite):
     def __init__(self):
         super(Editor, self).__init__()
-        self.editingGridBlockArray = []
+        self.editingGridBlockArray = dict()
         self.resetArray()
 
     def resetArray(self):
-        self.editingGridBlockArray = []
-        for i in range(ROWCOUNT*15):
-            self.editingGridBlockArray.append({f"{i+1}": 0})
+        self.editingGridBlockArray = dict()
 
 class Mouse(pygame.sprite.Sprite):
     def __init__(self):
@@ -354,7 +347,7 @@ class Mouse(pygame.sprite.Sprite):
 class Settings:
     def __init__(self):
         super(Settings, self).__init__()
-        self.steeringType = "mouse"
+        self.steeringType = "keyboard"
 
 settings = Settings()
 

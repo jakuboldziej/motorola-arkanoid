@@ -11,8 +11,9 @@ def loadlevels():
     level = Level()
     level.draw()
     # print(platform.currentLevel, level.winscore, PREVSCORE, SCORE)
-    playing = True
-    main()
+    if level.brickArray:
+        playing = True
+        main()
 
 def loadNextLevel():
     global PREVSCORE, bricks, platform
@@ -188,9 +189,17 @@ def settingsLoop():
                     mainMenu()
             if event.type == QUIT:
                 quit()
-            
-        button1 = Button(WIDTH/2-75, HEIGHT/1.3, 150, 60, buttonText="Back", onclickFunction=mainMenu)
+            # if event.type == pygame.MOUSEBUTTONDOWN:
+                # button1.process()
+                # button2.process()
+
+        text1 = font.render('Control platform by: ', True, (255, 255, 255))
+        display.blit(text1, (WIDTH/10, HEIGHT/12))
+        
+        button1 = Button(WIDTH/2-75, HEIGHT/1.3, 160, 60, buttonText="Back", onclickFunction=mainMenu)
+        button2 = Button(WIDTH/10, HEIGHT/7, 150, 60, buttonText="Mouse", onclickFunction=changeSteeringType)
         button1.process()
+        button2.process()
 
         pygame.display.flip()
         clock.tick(FPS)
@@ -279,8 +288,9 @@ def main():
                 else:
                     platform.platformDirection = "center"
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                ball.stick = False
-                platform.releaseBall()
+                if settings.steeringType == "mouse":
+                    ball.stick = False
+                    platform.releaseBall()
 
         drawWindow()
         updateEntites()
@@ -311,5 +321,12 @@ def saveEditor():
 
     editorClass.resetArray()
     mainMenu()
+
+def changeSteeringType():
+    if settings.steeringType == "mouse":
+        settings.steeringType = "keyboard"
+    else:
+        settings.steeringType = "mouse"
+    print(settings.steeringType)
 
 mainMenu()

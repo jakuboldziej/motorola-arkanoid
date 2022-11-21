@@ -13,7 +13,7 @@ import json
 
 BASEDIR = path.dirname(path.realpath(__file__))
 
-ROWCOUNT = 12
+ROWCOUNT = 15
 SCORE = 0
 PREVSCORE = 0
 FPS = 60
