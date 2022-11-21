@@ -165,19 +165,19 @@ def howToPlay():
         text4 = font.render('Press escape to stop the game.', True, WHITE[0])
         text5 = font.render('Brick values:', True, WHITE[0])
         values = pygame.image.load(path.join(BASEDIR, "images/values.png")).convert()
-        display.blit(values, (57, 50))
-        display.blit(text1, (WIDTH/6, HEIGHT/3 - 10))
-        display.blit(text2, (WIDTH/5 + 20, HEIGHT/2 - 60))
-        display.blit(text3, (WIDTH/5 - 15, HEIGHT/1.5 - 80))
-        display.blit(text4, (WIDTH/5 + 18, HEIGHT/1.5 - 40))
-        display.blit(text5, (WIDTH/3 + 35, 10))
+        display.blit(values, (WIDTH/2-values.get_width()/2, 50))
+        display.blit(text1, (WIDTH/2-text1.get_width()/2, HEIGHT/3 - 10))
+        display.blit(text2, (WIDTH/2-text2.get_width()/2, HEIGHT/2 - 60))
+        display.blit(text3, (WIDTH/2-text3.get_width()/2, HEIGHT/1.5 - 80))
+        display.blit(text4, (WIDTH/2-text4.get_width()/2, HEIGHT/1.5 - 40))
+        display.blit(text5, (WIDTH/2-text5.get_width()/2, 10))
         button3 = Button(WIDTH/2-75, HEIGHT/1.3, 150, 60, buttonText="Back", onclickFunction=mainMenu)
         button3.process()
 
         pygame.display.flip()
         clock.tick(FPS)
 
-def settings():
+def settingsLoop():
     running = True
     while running:
         display.fill(BLACK[0])
@@ -188,7 +188,7 @@ def settings():
                     mainMenu()
             if event.type == QUIT:
                 quit()
-
+            
         button1 = Button(WIDTH/2-75, HEIGHT/1.3, 150, 60, buttonText="Back", onclickFunction=mainMenu)
         button1.process()
 
@@ -247,7 +247,7 @@ def mainMenu():
             button6 = Button(WIDTH-153, HEIGHT-63, 150, 60, buttonText="Editor", onclickFunction=editor)
             button6.process()
 
-        button2 = Button(WIDTH/2-75, HEIGHT/2-30, 150, 60, buttonText="Settings", onclickFunction=settings)
+        button2 = Button(WIDTH/2-75, HEIGHT/2-30, 150, 60, buttonText="Settings", onclickFunction=settingsLoop)
         button3 = Button(WIDTH/2-75, HEIGHT/2+40, 150, 60, buttonText="Exit", onclickFunction=exit)
         button4 = Button(WIDTH-203, 3, 200, 60, buttonText="How To Play", onclickFunction=howToPlay)
 
@@ -271,6 +271,16 @@ def main():
             elif event.type == QUIT:
                 running = False
                 quit()
+            elif event.type == pygame.MOUSEMOTION:
+                if event.rel[0] > 0:
+                    platform.platformDirection = "right"
+                elif event.rel[0] < 0:
+                    platform.platformDirection = "left"
+                else:
+                    platform.platformDirection = "center"
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                ball.stick = False
+                platform.releaseBall()
 
         drawWindow()
         updateEntites()

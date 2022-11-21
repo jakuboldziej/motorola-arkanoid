@@ -1,11 +1,11 @@
 from classes import *
 
 gridBlocks = pygame.sprite.Group()
-brickCount = ROWCOUNT*10
+brickCount = ROWCOUNT*15
 startingY = 30*3
 startingX = 0
 for i in range(brickCount):
-    if i%10==0 and i != 0:
+    if i%15==0 and i != 0:
         startingX -= WIDTH
         startingY += 30
 
@@ -15,14 +15,14 @@ for i in range(brickCount):
 
 choosingGridBlockHeight = HEIGHT/1.3 - 10
 choosingGridBlocks = pygame.sprite.Group()
-silverGridBlock = GridBlock(WIDTH/13, choosingGridBlockHeight, choosingGridBlock=True, color=SILVER)
-orangeGridBlock = GridBlock(WIDTH/13 + 85, choosingGridBlockHeight, choosingGridBlock=True, color=ORANGE)
-aquaGridBlock = GridBlock(WIDTH/13 + 85*2, choosingGridBlockHeight, choosingGridBlock=True, color=AQUA)
-greenGridBlock = GridBlock(WIDTH/13 + 85*3, choosingGridBlockHeight, choosingGridBlock=True, color=GREEN)
-redGridBlock = GridBlock(WIDTH/13 + 85*4, choosingGridBlockHeight, choosingGridBlock=True, color=RED)
-blueGridBlock = GridBlock(WIDTH/13 + 85*5, choosingGridBlockHeight, choosingGridBlock=True, color=BLUE)
-pinkGridBlock = GridBlock(WIDTH/13 + 85*6, choosingGridBlockHeight, choosingGridBlock=True, color=PINK)
-goldGridBlock = GridBlock(WIDTH/13 + 85*7, choosingGridBlockHeight, choosingGridBlock=True, color=GOLD)
+silverGridBlock = GridBlock(WIDTH/2 - 85*4, choosingGridBlockHeight, choosingGridBlock=True, color=SILVER)
+orangeGridBlock = GridBlock(WIDTH/2 - 85*3, choosingGridBlockHeight, choosingGridBlock=True, color=ORANGE)
+aquaGridBlock = GridBlock(WIDTH/2 - 85*2, choosingGridBlockHeight, choosingGridBlock=True, color=AQUA)
+greenGridBlock = GridBlock(WIDTH/2 - 85, choosingGridBlockHeight, choosingGridBlock=True, color=GREEN)
+redGridBlock = GridBlock(WIDTH/2, choosingGridBlockHeight, choosingGridBlock=True, color=RED)
+blueGridBlock = GridBlock(WIDTH/2 + 85, choosingGridBlockHeight, choosingGridBlock=True, color=BLUE)
+pinkGridBlock = GridBlock(WIDTH/2 + 85*2, choosingGridBlockHeight, choosingGridBlock=True, color=PINK)
+goldGridBlock = GridBlock(WIDTH/2 + 85*3, choosingGridBlockHeight, choosingGridBlock=True, color=GOLD)
 
 choosingGridBlocks.add(silverGridBlock)
 choosingGridBlocks.add(orangeGridBlock)

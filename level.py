@@ -25,9 +25,9 @@ class Level:
 
         startingY = 30*3
         startingX = 0
-        brickCount = ROWCOUNT*10
+        brickCount = ROWCOUNT*15
         for i, brick in enumerate(gridArray):
-            if i%10==0 and i != 0:
+            if i%15==0 and i != 0:
                     startingX -= WIDTH
                     startingY += 30
 

@@ -13,7 +13,7 @@ import json
 
 BASEDIR = path.dirname(path.realpath(__file__))
 
-ROWCOUNT = 5
+ROWCOUNT = 12
 SCORE = 0
 PREVSCORE = 0
 FPS = 60
@@ -36,7 +36,7 @@ COLORS = (SILVER, ORANGE, AQUA, GREEN, RED, BLUE, PINK, GOLD)
 
 COLORFUL = (SILVER, ORANGE, AQUA, GREEN, RED, BLUE, PINK)
 
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 1200, 800
 display = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Arkanoid')
 
