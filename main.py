@@ -1,5 +1,4 @@
 from level import *
-from editor import *
 
 pygame.init()
 
@@ -209,6 +208,8 @@ def settingsLoop():
                 
 def editor():
     # inputBox = InputBox(300, 0, 50, 32)
+    editorClass.editing = True
+    editorClass.creatingGrid()
     running = True
     while running:
         global mouse
@@ -221,7 +222,14 @@ def editor():
                     mainMenu()
             if event.type == QUIT:
                 quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                button1.process()
+                button2.process()
+                button3.process()
+                button4.process()
             # inputBox.handle_event(event)
+
+        # print(editorClass.currentLevel)
 
         for gridBlock in gridBlocks:
             gridBlock.draw()
@@ -232,14 +240,16 @@ def editor():
             choosingGridBlock.process()
 
         button1 = Button(WIDTH/2-75, HEIGHT/1.2, 150, 60, buttonText="Back", onclickFunction=mainMenu)
-        global button2
         button2 = Button(3, HEIGHT-63, 150, 60, buttonText="Save", onclickFunction=saveEditor)
-        button1.process()
-        button2.process()
+        button3 = Button(WIDTH - 147, 50, 30, 30, buttonText="<", onclickFunction=loadPrevEditorLevel, onePress=True)
+        button4 = Button(WIDTH - 60, 50, 30, 30, buttonText=">", onclickFunction=loadNextEditorLevel, onePress=True)
+        
         button1.draw()
         button2.draw()
+        button3.draw()
+        button4.draw()
 
-        text2 = font.render('Level: ' + str(platform.currentLevel), True, (0, 255, 0))
+        text2 = font.render('Level: ' + str(editorClass.currentLevel), True, (0, 255, 0))
         display.blit(text2, (WIDTH-150, 10))
 
         # inputBox.draw(display)
@@ -313,18 +323,30 @@ def main():
         clock.tick(FPS)
 
 # Utils
-def loadEditingLevel():
+def loadPrevEditorLevel():
+    with open("levels.json", "r+") as f:
+        data = json.load(f)
+        levels = data["levels"]
+    if levels:
+        print(editorClass.currentLevel, len(levels))
+        if editorClass.currentLevel > len(levels):
+            editorClass.currentLevel -= 1
+            editor()
+        else:
+            if levels[editorClass.currentLevel-1]["levelId"] != 1:
+                editorClass.currentLevel -= 1
+                # print(editorClass.currentLevel)
+                editor()
+
+def loadNextEditorLevel():
     with open("levels.json", "r+") as f:
         data = json.load(f)
         levels = data["levels"]
 
-    if levels:
-        lastLevelId = data["levels"][-1]["levelId"]
-    else:
-        lastLevelId = 0
-
-    print(lastLevelId)
-    # loading level
+    if editorClass.currentLevel < len(levels):
+        editorClass.currentLevel += 1
+        # print(editorClass.currentLevel)
+        editor()
 
 def saveEditor():
     with open("levels.json", "r+") as f:
@@ -332,12 +354,18 @@ def saveEditor():
         levels = data["levels"]
 
     if levels:
-        lastLevelId = data["levels"][-1]["levelId"]
+        lastLevelId = levels[-1]["levelId"]
     else:
         lastLevelId = 0
     
-    new_level = {"levelId": int(lastLevelId)+1, "gridArray": editorClass.editingGridBlockArray}
-    levels.append(new_level)
+    if not editorClass.editing:
+        newLevel = {"levelId": int(lastLevelId)+1, "gridArray": editorClass.editingGridBlockArray}
+        levels.append(newLevel)
+    else:
+        editingLevel = levels[editorClass.currentLevel-1]
+        editingLevelGridArray = editingLevel["gridArray"] = editorClass.editingGridBlockArray
+        print(editingLevelGridArray)
+
     jsonLevels = json.dumps(data, indent=1)
     with open('levels.json', "w") as f:
         f.write(str(jsonLevels))

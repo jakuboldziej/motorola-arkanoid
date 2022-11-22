@@ -1,7 +1,5 @@
 from classes import *
 
-from ast import literal_eval
-
 class Level:
     def __init__(self):
         super(Level, self).__init__()

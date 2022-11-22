@@ -10,6 +10,7 @@ from pygame.locals import (
 from os import path
 import random
 import json
+from ast import literal_eval
 
 BASEDIR = path.dirname(path.realpath(__file__))
 

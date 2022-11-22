@@ -279,12 +279,13 @@ class PowerUp(pygame.sprite.Sprite):
         print(boostType)
 
 class GridBlock(pygame.sprite.Sprite):
-    def __init__(self, x, y, choosingGridBlock=False, color=WHITE, id=0):
+    def __init__(self, x, y, choosingGridBlock=False, editingGridBlock=False,  color=WHITE, id=0):
         super(GridBlock, self).__init__()
         self.id = id
         self.x = x
         self.y = y
         self.choosingGridBlock = choosingGridBlock
+        self.editingGridBlock = editingGridBlock
         self.width = 80
         self.height = 30
         self.color = color
@@ -337,19 +338,108 @@ class GridBlock(pygame.sprite.Sprite):
 
     def manageArray(self, append):
         if append:
-            editorClass.editingGridBlockArray[self.id] =  str(self.color[0])
+            editorClass.editingGridBlockArray[f"{self.id}"] =  str(self.color[0])
+            print(self.id, editorClass.editingGridBlockArray, self.selected)
         else:
-            editorClass.editingGridBlockArray.pop(self.id)
+            editorClass.editingGridBlockArray.pop(f"{self.id}")
+            print(self.id, editorClass.editingGridBlockArray, self.selected)
 
 class Editor(pygame.sprite.Sprite):
     def __init__(self):
         super(Editor, self).__init__()
         self.editingGridBlockArray = dict()
+        self.currentLevel = 1
+        self.editing = False
         self.resetArray()
-        self.currentEditingLevel = 0
+        print(self.currentLevel)
     
     def resetArray(self):
         self.editingGridBlockArray = dict()
+        self.choosingColor = SILVER
+
+    def changeEditingLevel(self, levelId):
+        self.currentLevel = levelId
+
+    def creatingGrid(self):
+        self.resetArray()
+        with open("levels.json", "r+") as f:
+            data = json.load(f)
+            levels = data["levels"]
+
+        if not levels:
+            self.currentLevel = 1
+            
+            brickCount = ROWCOUNT*15
+            startingY = 30*3
+            startingX = 0
+            for i in range(brickCount):
+                if i%15==0 and i != 0:
+                    startingX -= WIDTH
+                    startingY += 30
+
+                # print(i*80, startingX, startingY)
+                newGridBlock = GridBlock(startingX+i*80, startingY, id=i+1)
+                gridBlocks.add(newGridBlock)
+        else:
+            if self.editing:
+                for level in levels:
+                    levelId = level["levelId"]
+                    if int(levelId) == self.currentLevel:
+                        gridArray = level["gridArray"]
+                        self.brickArray = gridArray
+
+                editorClass.editingGridBlockArray = dict(gridArray)
+
+                brickCount = ROWCOUNT*15
+                startingY = 30*3
+                startingX = 0
+                for i in range(brickCount):
+                    if i%15==0 and i != 0:
+                        startingX -= WIDTH
+                        startingY += 30
+
+                    gridBlock = gridArray.get(f"{i+1}")
+                    if gridBlock != None:
+                        for color in COLORS:
+                            if literal_eval(gridBlock) == color[0]:
+                                gridBlockColor = color
+
+                        newGridBlock = GridBlock(startingX+i*80, startingY, id=i+1, editingGridBlock=True, color=gridBlockColor)
+                        newGridBlock.selected = True
+                    else:
+                        newGridBlock = GridBlock(startingX+i*80, startingY, id=i+1, editingGridBlock=True)
+                    gridBlocks.add(newGridBlock)
+            else:
+                brickCount = ROWCOUNT*15
+                startingY = 30*3
+                startingX = 0
+                for i in range(brickCount):
+                    if i%15==0 and i != 0:
+                        startingX -= WIDTH
+                        startingY += 30
+
+                    # print(i*80, startingX, startingY)
+                    newGridBlock = GridBlock(startingX+i*80, startingY, id=i+1)
+                    gridBlocks.add(newGridBlock)
+                
+        choosingGridBlockHeight = HEIGHT/1.3 - 10
+        silverGridBlock = GridBlock(WIDTH/2 - 85*4, choosingGridBlockHeight, choosingGridBlock=True, color=SILVER)
+        orangeGridBlock = GridBlock(WIDTH/2 - 85*3, choosingGridBlockHeight, choosingGridBlock=True, color=ORANGE)
+        aquaGridBlock = GridBlock(WIDTH/2 - 85*2, choosingGridBlockHeight, choosingGridBlock=True, color=AQUA)
+        greenGridBlock = GridBlock(WIDTH/2 - 85, choosingGridBlockHeight, choosingGridBlock=True, color=GREEN)
+        redGridBlock = GridBlock(WIDTH/2, choosingGridBlockHeight, choosingGridBlock=True, color=RED)
+        blueGridBlock = GridBlock(WIDTH/2 + 85, choosingGridBlockHeight, choosingGridBlock=True, color=BLUE)
+        pinkGridBlock = GridBlock(WIDTH/2 + 85*2, choosingGridBlockHeight, choosingGridBlock=True, color=PINK)
+        goldGridBlock = GridBlock(WIDTH/2 + 85*3, choosingGridBlockHeight, choosingGridBlock=True, color=GOLD)
+
+        choosingGridBlocks.add(silverGridBlock)
+        choosingGridBlocks.add(orangeGridBlock)
+        choosingGridBlocks.add(aquaGridBlock)
+        choosingGridBlocks.add(greenGridBlock)
+        choosingGridBlocks.add(redGridBlock)
+        choosingGridBlocks.add(blueGridBlock)
+        choosingGridBlocks.add(pinkGridBlock)
+        choosingGridBlocks.add(goldGridBlock)
 
 class Mouse(pygame.sprite.Sprite):
     def __init__(self):
@@ -372,8 +462,11 @@ platform = Platform()
 ball = Ball()
 mouse = Mouse()
 
+
 bricks = pygame.sprite.Group()
 # balls = pygame.sprite.Group()
 powerUps = pygame.sprite.Group()
+gridBlocks = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
+choosingGridBlocks = pygame.sprite.Group()
 # all_sprites.add(ball)
