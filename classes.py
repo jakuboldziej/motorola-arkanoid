@@ -20,39 +20,55 @@ class Button():
             'pressed': '#333333',
         }
 
-        self.buttonSurface = pygame.Surface((self.width, self.height))
-        self.buttonRect = pygame.Rect(self.x, self.y, self.width, self.height)
-
-        self.buttonSurf = font.render(self.buttonText, True, (20, 20, 20))
-
         self.clicked = False
         self.alreadyPressed = False
 
+        self.buttonSurf = font.render(self.buttonText, True, BLACK[0])
+        self.buttonSurface = pygame.Surface((self.width, self.height))
+        self.buttonRect = pygame.Rect(self.x, self.y, self.width, self.height)
+
     def process(self):
         mousePos = pygame.mouse.get_pos()
-        
-        self.buttonSurface.fill(self.fillColors['normal'])
+
         if self.buttonRect.collidepoint(mousePos):
-            self.buttonSurface.fill(self.fillColors['hover'])
-            if pygame.mouse.get_pressed(num_buttons=3)[0]:
+            if pygame.mouse.get_pressed(num_buttons=3)[0] and self.clicked == False:
                 self.buttonSurface.fill(self.fillColors['pressed'])
-                if not self.clicked:
-                    self.clicked = True
-                    if not self.alreadyPressed:
-                        self.onclickFunction()
-                        # print("clicked")
-                        self.alreadyPressed = True
-                    else:
-                        self.alreadyPressed = False
+                self.clicked = True
+                if not self.alreadyPressed:
+                    self.onclickFunction()
+                    self.alreadyPressed = True
+                else:
+                    self.alreadyPressed = False
             else:
                 self.clicked = False
+        
+    def draw(self):
+        mousePos = pygame.mouse.get_pos()
+        self.buttonSurface.fill(self.fillColors['normal'])
+        
+        if self.buttonRect.collidepoint(mousePos):
+            self.buttonSurface.fill(self.fillColors['hover'])
 
         self.buttonSurface.blit(self.buttonSurf, [
             self.buttonRect.width/2 - self.buttonSurf.get_rect().width/2,
             self.buttonRect.height/2 - self.buttonSurf.get_rect().height/2
         ])
         display.blit(self.buttonSurface, self.buttonRect)
-        
+
+    def changeText(self, text):
+        self.buttonText = text
+
+        self.buttonSurf = font.render(self.buttonText, True, 'white')
+        self.buttonSurface = pygame.Surface((self.width, self.height))
+        self.buttonRect = pygame.Rect(self.x, self.y, self.width, self.height)
+
+        self.buttonSurface.blit(self.buttonSurf, [
+            self.buttonRect.width/2 - self.buttonSurf.get_rect().width/2,
+            self.buttonRect.height/2 - self.buttonSurf.get_rect().height/2
+        ])
+        display.blit(self.buttonSurface, self.buttonRect)
+
+        print(self.buttonText)
 
 COLOR_INACTIVE = pygame.Color('lightskyblue3')
 COLOR_ACTIVE = pygame.Color('dodgerblue2')
@@ -141,7 +157,6 @@ class Platform(pygame.sprite.Sprite):
 
     def releaseBall(self):
         if self.platformDirection == "left":
-            print(ball.directionX)
             ball.directionX = -ball.speedX
             ball.directionY = -ball.speedY
             ball.direction = "left," + ball.direction.split(",")[1]
@@ -187,7 +202,7 @@ class Ball(pygame.sprite.Sprite):
                 platform.lifes -= 1
             elif self.rect.top < 0:
                 self.directionY = +self.speedY
-                self.direction = self.direction.split(",")[0] +",down"
+                self.direction = self.direction.split(",")[0] + ",down"
             elif self.rect.left < 0:
                 self.directionX = +self.speedX
                 self.direction = "right," + self.direction.split(",")[1]
@@ -331,7 +346,8 @@ class Editor(pygame.sprite.Sprite):
         super(Editor, self).__init__()
         self.editingGridBlockArray = dict()
         self.resetArray()
-
+        self.currentEditingLevel = 0
+    
     def resetArray(self):
         self.editingGridBlockArray = dict()
 

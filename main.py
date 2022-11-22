@@ -61,16 +61,18 @@ def manageCollisions():
     for brick in brickCollision:
         if ball.rect.left < brick.rect.right and ball.direction.split(",")[0] == "left" and not ball.rect.right < brick.rect.right:
             ball.directionX = +ball.speedX
-            # print(self.direction.split(","), "RIGHT")
+            ball.direction = "right," + ball.direction.split(",")[1]
         elif ball.rect.right > brick.rect.left and ball.direction.split(",")[0] == "right" and not ball.rect.left > brick.rect.left:
             ball.directionX = -ball.speedX
-            # print(self.direction.split(","), "LEFT")
+            ball.direction = "left," + ball.direction.split(",")[1]
         elif ball.rect.top < brick.rect.bottom and ball.rect.bottom > brick.rect.bottom:
             ball.directionY = +ball.speedY
-            # print(self.direction.split(","), "BOTTOM")
+            ball.direction = ball.direction.split(",")[0] + ",down"
         elif ball.rect.bottom > brick.rect.top and ball.direction.split(",")[1] == "down":
             ball.directionY = -ball.speedY
-            # print(self.direction.split(","), "TOP")
+            ball.direction = ball.direction.split(",")[0] + ",up"
+
+        # print(ball.direction)
 
         if platform.currentPowerUp == "strongerHit" and brick.color != GOLD:
             brick.health = 0
@@ -174,6 +176,7 @@ def howToPlay():
         display.blit(text5, (WIDTH/2-text5.get_width()/2, 10))
         button3 = Button(WIDTH/2-75, HEIGHT/1.3, 150, 60, buttonText="Back", onclickFunction=mainMenu)
         button3.process()
+        button3.draw()
 
         pygame.display.flip()
         clock.tick(FPS)
@@ -189,18 +192,18 @@ def settingsLoop():
                     mainMenu()
             if event.type == QUIT:
                 quit()
-            # if event.type == pygame.MOUSEBUTTONDOWN:
-                # button1.process()
-                # button2.process()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                button1.process()
+                button2.process()
 
         text1 = font.render('Control platform by: ', True, (255, 255, 255))
         display.blit(text1, (WIDTH/10, HEIGHT/12))
         
         button1 = Button(WIDTH/2-75, HEIGHT/1.3, 160, 60, buttonText="Back", onclickFunction=mainMenu)
         button2 = Button(WIDTH/10, HEIGHT/7, 150, 60, buttonText="Mouse", onclickFunction=changeSteeringType)
-        button1.process()
-        button2.process()
-
+        button1.draw()
+        button2.draw()
+        
         pygame.display.flip()
         clock.tick(FPS)
                 
@@ -233,6 +236,11 @@ def editor():
         button2 = Button(3, HEIGHT-63, 150, 60, buttonText="Save", onclickFunction=saveEditor)
         button1.process()
         button2.process()
+        button1.draw()
+        button2.draw()
+
+        text2 = font.render('Level: ' + str(platform.currentLevel), True, (0, 255, 0))
+        display.blit(text2, (WIDTH-150, 10))
 
         # inputBox.draw(display)
 
@@ -251,10 +259,12 @@ def mainMenu():
             button1 = Button(WIDTH/2-75, HEIGHT/2-100, 150, 60, buttonText="Resume", onclickFunction=main)
             button5 = Button(WIDTH-153, HEIGHT-63, 150, 60, buttonText="Restart", onclickFunction=restartBall)
             button5.process()
+            button5.draw()
         else:
             button1 = Button(WIDTH/2-75, HEIGHT/2-100, 150, 60, buttonText="Start", onclickFunction=loadlevels)
             button6 = Button(WIDTH-153, HEIGHT-63, 150, 60, buttonText="Editor", onclickFunction=editor)
             button6.process()
+            button6.draw()
 
         button2 = Button(WIDTH/2-75, HEIGHT/2-30, 150, 60, buttonText="Settings", onclickFunction=settingsLoop)
         button3 = Button(WIDTH/2-75, HEIGHT/2+40, 150, 60, buttonText="Exit", onclickFunction=exit)
@@ -264,6 +274,10 @@ def mainMenu():
         button2.process()
         button3.process()
         button4.process()
+        button1.draw()
+        button2.draw()
+        button3.draw()
+        button4.draw()
 
         pygame.display.flip()
         clock.tick(FPS)
@@ -299,6 +313,19 @@ def main():
         clock.tick(FPS)
 
 # Utils
+def loadEditingLevel():
+    with open("levels.json", "r+") as f:
+        data = json.load(f)
+        levels = data["levels"]
+
+    if levels:
+        lastLevelId = data["levels"][-1]["levelId"]
+    else:
+        lastLevelId = 0
+
+    print(lastLevelId)
+    # loading level
+
 def saveEditor():
     with open("levels.json", "r+") as f:
         data = json.load(f)
@@ -327,6 +354,6 @@ def changeSteeringType():
         settings.steeringType = "keyboard"
     else:
         settings.steeringType = "mouse"
-    print(settings.steeringType)
+    # print(settings.steeringType)
 
 mainMenu()
