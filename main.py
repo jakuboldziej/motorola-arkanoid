@@ -139,15 +139,6 @@ def restartBall():
     ball.stick = True
     main()
 
-def manageLifes():
-    global SCORE, PREVSCORE
-    if platform.lifes == 0:
-        platform.currentLevel = 1
-        SCORE = 0
-        PREVSCORE = 0
-        platform.rect[2] = 100
-        # do something
-
 # Game Loops
 def howToPlay():
     running = True
@@ -208,8 +199,8 @@ def settingsLoop():
                 
 def editor():
     # inputBox = InputBox(300, 0, 50, 32)
-    editorClass.editing = True
     editorClass.creatingGrid()
+    # print(editorClass.currentLevel)
     running = True
     while running:
         global mouse
@@ -227,6 +218,7 @@ def editor():
                 button2.process()
                 button3.process()
                 button4.process()
+                # button5.process()
             # inputBox.handle_event(event)
 
         # print(editorClass.currentLevel)
@@ -243,11 +235,13 @@ def editor():
         button2 = Button(3, HEIGHT-63, 150, 60, buttonText="Save", onclickFunction=saveEditor)
         button3 = Button(WIDTH - 147, 50, 30, 30, buttonText="<", onclickFunction=loadPrevEditorLevel, onePress=True)
         button4 = Button(WIDTH - 60, 50, 30, 30, buttonText=">", onclickFunction=loadNextEditorLevel, onePress=True)
+        # button5 = Button(WIDTH/2-75, 20, 150, 60, buttonText="Delete", onclickFunction=deleteEditorLevel, onePress=True)
         
         button1.draw()
         button2.draw()
         button3.draw()
         button4.draw()
+        # button5.draw()
 
         text2 = font.render('Level: ' + str(editorClass.currentLevel), True, (0, 255, 0))
         display.blit(text2, (WIDTH-150, 10))
@@ -272,9 +266,10 @@ def mainMenu():
             button5.draw()
         else:
             button1 = Button(WIDTH/2-75, HEIGHT/2-100, 150, 60, buttonText="Start", onclickFunction=loadlevels)
-            button6 = Button(WIDTH-153, HEIGHT-63, 150, 60, buttonText="Editor", onclickFunction=editor)
-            button6.process()
-            button6.draw()
+        
+        button6 = Button(WIDTH/2-75, HEIGHT-63, 150, 60, buttonText="Editor", onclickFunction=editor)
+        button6.process()
+        button6.draw()
 
         button2 = Button(WIDTH/2-75, HEIGHT/2-30, 150, 60, buttonText="Settings", onclickFunction=settingsLoop)
         button3 = Button(WIDTH/2-75, HEIGHT/2+40, 150, 60, buttonText="Exit", onclickFunction=exit)
@@ -328,15 +323,10 @@ def loadPrevEditorLevel():
         data = json.load(f)
         levels = data["levels"]
     if levels:
-        print(editorClass.currentLevel, len(levels))
-        if editorClass.currentLevel > len(levels):
+        if editorClass.currentLevel != 1:
+            editorClass.editing = True
             editorClass.currentLevel -= 1
             editor()
-        else:
-            if levels[editorClass.currentLevel-1]["levelId"] != 1:
-                editorClass.currentLevel -= 1
-                # print(editorClass.currentLevel)
-                editor()
 
 def loadNextEditorLevel():
     with open("levels.json", "r+") as f:
@@ -345,8 +335,29 @@ def loadNextEditorLevel():
 
     if editorClass.currentLevel < len(levels):
         editorClass.currentLevel += 1
-        # print(editorClass.currentLevel)
-        editor()
+        editorClass.editing = True
+    else:
+        editorClass.currentLevel = len(levels) + 1
+        editorClass.editing = False
+
+    editor()
+
+def deleteEditorLevel():
+    with open("levels.json", "r+") as f:
+        data = json.load(f)
+        levels = data["levels"]
+
+    for level in levels:
+        if level["levelId"] == editorClass.currentLevel and editorClass.editing:
+            levels.remove(level)
+
+            jsonLevels = json.dumps(data, indent=1)
+            with open('levels.json', "w") as f:
+                f.write(str(jsonLevels))
+            
+            editorClass.resetArray()
+            editorClass.editing = False
+            editor()
 
 def saveEditor():
     with open("levels.json", "r+") as f:
@@ -363,25 +374,28 @@ def saveEditor():
         levels.append(newLevel)
     else:
         editingLevel = levels[editorClass.currentLevel-1]
-        editingLevelGridArray = editingLevel["gridArray"] = editorClass.editingGridBlockArray
-        print(editingLevelGridArray)
+        editingLevel["gridArray"] = editorClass.editingGridBlockArray
 
     jsonLevels = json.dumps(data, indent=1)
     with open('levels.json', "w") as f:
         f.write(str(jsonLevels))
 
-    for gridBlock in gridBlocks:
-        gridBlock.selected = False
-        gridBlock.color = WHITE
-
-    editorClass.resetArray()
-    mainMenu()
+    editorClass.editing = True
 
 def changeSteeringType():
     if settings.steeringType == "mouse":
         settings.steeringType = "keyboard"
     else:
         settings.steeringType = "mouse"
-    # print(settings.steeringType)
+    print(settings.steeringType)
+
+def manageLifes():
+    global SCORE, PREVSCORE
+    if platform.lifes == 0:
+        platform.currentLevel = 1
+        SCORE = 0
+        PREVSCORE = 0
+        platform.rect[2] = 100
+        # do something
 
 mainMenu()

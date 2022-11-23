@@ -339,17 +339,15 @@ class GridBlock(pygame.sprite.Sprite):
     def manageArray(self, append):
         if append:
             editorClass.editingGridBlockArray[f"{self.id}"] =  str(self.color[0])
-            print(self.id, editorClass.editingGridBlockArray, self.selected)
         else:
             editorClass.editingGridBlockArray.pop(f"{self.id}")
-            print(self.id, editorClass.editingGridBlockArray, self.selected)
 
 class Editor(pygame.sprite.Sprite):
     def __init__(self):
         super(Editor, self).__init__()
         self.editingGridBlockArray = dict()
         self.currentLevel = 1
-        self.editing = False
+        self.editing = True
         self.resetArray()
         print(self.currentLevel)
     
@@ -357,15 +355,14 @@ class Editor(pygame.sprite.Sprite):
         self.editingGridBlockArray = dict()
         self.choosingColor = SILVER
 
-    def changeEditingLevel(self, levelId):
-        self.currentLevel = levelId
-
     def creatingGrid(self):
         self.resetArray()
+        for gridBlock in gridBlocks:
+            gridBlock.kill()
         with open("levels.json", "r+") as f:
             data = json.load(f)
             levels = data["levels"]
-
+        
         if not levels:
             self.currentLevel = 1
             
@@ -387,7 +384,7 @@ class Editor(pygame.sprite.Sprite):
                     if int(levelId) == self.currentLevel:
                         gridArray = level["gridArray"]
                         self.brickArray = gridArray
-
+                
                 editorClass.editingGridBlockArray = dict(gridArray)
 
                 brickCount = ROWCOUNT*15
@@ -422,6 +419,8 @@ class Editor(pygame.sprite.Sprite):
                     newGridBlock = GridBlock(startingX+i*80, startingY, id=i+1)
                     gridBlocks.add(newGridBlock)
                 
+        # print(editorClass.editingGridBlockArray)
+
         choosingGridBlockHeight = HEIGHT/1.3 - 10
         silverGridBlock = GridBlock(WIDTH/2 - 85*4, choosingGridBlockHeight, choosingGridBlock=True, color=SILVER)
         orangeGridBlock = GridBlock(WIDTH/2 - 85*3, choosingGridBlockHeight, choosingGridBlock=True, color=ORANGE)
