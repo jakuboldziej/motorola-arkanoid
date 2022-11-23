@@ -98,9 +98,9 @@ def manageCollisions():
 
 # Drawing and updating
 def drawText():
-    text1 = font.render('Score: ' + str(SCORE), True, (0, 255, 0))
-    text2 = font.render('Level: ' + str(platform.currentLevel), True, (0, 255, 0))
-    text3 = font.render('Lifes: ' + str(platform.lifes), True, (0, 255, 0))
+    text1 = font.render(f'Score: {str(SCORE)}', True, (0, 255, 0))
+    text2 = font.render(f'Level: {str(platform.currentLevel)}', True, (0, 255, 0))
+    text3 = font.render(f'Lifes: {str(platform.lifes)}', True, (0, 255, 0))
     display.blit(text1, (10, 10))
     display.blit(text2, (WIDTH-150, 10))
     display.blit(text3, (10, 50))
@@ -186,11 +186,11 @@ def settingsLoop():
                 button1.process()
                 button2.process()
 
-        text1 = font.render('Control platform by: ', True, (255, 255, 255))
+        text1 = font.render(f'Platform is controlled by: {settings.steeringType}.', True, (255, 255, 255))
         display.blit(text1, (WIDTH/10, HEIGHT/12))
         
         button1 = Button(WIDTH/2-75, HEIGHT/1.3, 160, 60, buttonText="Back", onclickFunction=mainMenu)
-        button2 = Button(WIDTH/10, HEIGHT/7, 150, 60, buttonText="Mouse", onclickFunction=changeSteeringType)
+        button2 = Button(WIDTH/10 + 200, HEIGHT/7, 150, 60, buttonText="Change", onclickFunction=changeSteeringType)
         button1.draw()
         button2.draw()
         
@@ -219,6 +219,7 @@ def editor():
                 button3.process()
                 button4.process()
                 # button5.process()
+                # button6.process()
             # inputBox.handle_event(event)
 
         # print(editorClass.currentLevel)
@@ -236,14 +237,16 @@ def editor():
         button3 = Button(WIDTH - 147, 50, 30, 30, buttonText="<", onclickFunction=loadPrevEditorLevel, onePress=True)
         button4 = Button(WIDTH - 60, 50, 30, 30, buttonText=">", onclickFunction=loadNextEditorLevel, onePress=True)
         # button5 = Button(WIDTH/2-75, 20, 150, 60, buttonText="Delete", onclickFunction=deleteEditorLevel, onePress=True)
+        # button6 = Button(WIDTH/2, 20, 150, 60, buttonText="Clear", onclickFunction=clearEditorLevel, onePress=True)
         
         button1.draw()
         button2.draw()
         button3.draw()
         button4.draw()
         # button5.draw()
+        # button6.draw()
 
-        text2 = font.render('Level: ' + str(editorClass.currentLevel), True, (0, 255, 0))
+        text2 = font.render(f'Level: {str(editorClass.currentLevel)}', True, (0, 255, 0))
         display.blit(text2, (WIDTH-150, 10))
 
         # inputBox.draw(display)
@@ -381,6 +384,9 @@ def saveEditor():
         f.write(str(jsonLevels))
 
     editorClass.editing = True
+
+def clearEditorLevel():
+    editorClass.resetArray()
 
 def changeSteeringType():
     if settings.steeringType == "mouse":

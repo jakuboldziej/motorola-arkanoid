@@ -55,21 +55,6 @@ class Button():
         ])
         display.blit(self.buttonSurface, self.buttonRect)
 
-    def changeText(self, text):
-        self.buttonText = text
-
-        self.buttonSurf = font.render(self.buttonText, True, 'white')
-        self.buttonSurface = pygame.Surface((self.width, self.height))
-        self.buttonRect = pygame.Rect(self.x, self.y, self.width, self.height)
-
-        self.buttonSurface.blit(self.buttonSurf, [
-            self.buttonRect.width/2 - self.buttonSurf.get_rect().width/2,
-            self.buttonRect.height/2 - self.buttonSurf.get_rect().height/2
-        ])
-        display.blit(self.buttonSurface, self.buttonRect)
-
-        print(self.buttonText)
-
 COLOR_INACTIVE = pygame.Color('lightskyblue3')
 COLOR_ACTIVE = pygame.Color('dodgerblue2')
 class InputBox:
@@ -349,7 +334,6 @@ class Editor(pygame.sprite.Sprite):
         self.currentLevel = 1
         self.editing = True
         self.resetArray()
-        print(self.currentLevel)
     
     def resetArray(self):
         self.editingGridBlockArray = dict()
@@ -460,7 +444,6 @@ editorClass = Editor()
 platform = Platform()
 ball = Ball()
 mouse = Mouse()
-
 
 bricks = pygame.sprite.Group()
 # balls = pygame.sprite.Group()
