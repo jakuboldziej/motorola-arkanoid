@@ -337,7 +337,7 @@ class Editor(pygame.sprite.Sprite):
     
     def resetArray(self):
         self.editingGridBlockArray = dict()
-        self.choosingColor = SILVER
+        self.choosingColor = WHITE
 
     def creatingGrid(self):
         self.resetArray()
@@ -406,22 +406,26 @@ class Editor(pygame.sprite.Sprite):
         # print(editorClass.editingGridBlockArray)
 
         choosingGridBlockHeight = HEIGHT/1.3 - 10
-        silverGridBlock = GridBlock(WIDTH/2 - 85*4, choosingGridBlockHeight, choosingGridBlock=True, color=SILVER)
+        whiteGridBlock = GridBlock(WIDTH/2 - 85*4, choosingGridBlockHeight, choosingGridBlock=True, color=WHITE)
         orangeGridBlock = GridBlock(WIDTH/2 - 85*3, choosingGridBlockHeight, choosingGridBlock=True, color=ORANGE)
         aquaGridBlock = GridBlock(WIDTH/2 - 85*2, choosingGridBlockHeight, choosingGridBlock=True, color=AQUA)
         greenGridBlock = GridBlock(WIDTH/2 - 85, choosingGridBlockHeight, choosingGridBlock=True, color=GREEN)
         redGridBlock = GridBlock(WIDTH/2, choosingGridBlockHeight, choosingGridBlock=True, color=RED)
         blueGridBlock = GridBlock(WIDTH/2 + 85, choosingGridBlockHeight, choosingGridBlock=True, color=BLUE)
         pinkGridBlock = GridBlock(WIDTH/2 + 85*2, choosingGridBlockHeight, choosingGridBlock=True, color=PINK)
-        goldGridBlock = GridBlock(WIDTH/2 + 85*3, choosingGridBlockHeight, choosingGridBlock=True, color=GOLD)
+        yellowGridBlock = GridBlock(WIDTH/2 + 85*3, choosingGridBlockHeight, choosingGridBlock=True, color=YELLOW)
+        silverGridBlock = GridBlock(WIDTH/2 - 85*4, choosingGridBlockHeight + 35, choosingGridBlock=True, color=SILVER)
+        goldGridBlock = GridBlock(WIDTH/2 + 85*3, choosingGridBlockHeight + 35, choosingGridBlock=True, color=GOLD)
 
-        choosingGridBlocks.add(silverGridBlock)
+        choosingGridBlocks.add(whiteGridBlock)
         choosingGridBlocks.add(orangeGridBlock)
         choosingGridBlocks.add(aquaGridBlock)
         choosingGridBlocks.add(greenGridBlock)
         choosingGridBlocks.add(redGridBlock)
         choosingGridBlocks.add(blueGridBlock)
         choosingGridBlocks.add(pinkGridBlock)
+        choosingGridBlocks.add(yellowGridBlock)
+        choosingGridBlocks.add(silverGridBlock)
         choosingGridBlocks.add(goldGridBlock)
 
 class Mouse(pygame.sprite.Sprite):
@@ -431,7 +435,7 @@ class Mouse(pygame.sprite.Sprite):
         self.surf = pygame.Surface((0.1, 0.1))
         self.surf.fill(WHITE[0])
         self.rect = self.surf.get_rect(center=(self.pos[0], self.pos[1]))
-        self.choosingColor = SILVER
+        self.choosingColor = WHITE
 
 class Settings:
     def __init__(self):

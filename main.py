@@ -76,7 +76,8 @@ def manageCollisions():
         if platform.currentPowerUp == "strongerHit" and brick.color != GOLD:
             brick.health = 0
         else:
-            brick.health -= 1
+            if brick.color != GOLD:
+                brick.health -= 1
 
         if brick.health == 0:
             global SCORE
@@ -152,21 +153,58 @@ def howToPlay():
             if event.type == QUIT:
                 quit()
 
-        text1 = font.render('You can move platform by pressing', True, WHITE[0])
-        text2 = font.render('arrow keys on your beyboard.', True, WHITE[0])
-        text3 = font.render('Press spacebar to release the ball.', True, WHITE[0])
-        text4 = font.render('Press escape to stop the game.', True, WHITE[0])
-        text5 = font.render('Brick values:', True, WHITE[0])
+        text1 = font.render('Brick values:', True, WHITE[0])
+        text2 = font.render('Silver blocks: 50 * level number.', True, WHITE[0])
+        text3 = font.render('Gold blocks are indestructible.', True, WHITE[0])
+        text4 = font.render('Silver blocks needs 2 hits to brake and extra hit is needed every 8 levels.', True, WHITE[0])
+        text5 = font.render('You can move platform by pressing arrow keys on your keyboard', True, WHITE[0])
+        text6 = font.render('or by moving your mouse.', True, WHITE[0])
+        text7 = font.render('Press spacebar to release the ball.', True, WHITE[0])
+        text8 = font.render('Press escape to stop the game.', True, WHITE[0])
+        display.blit(text1, (WIDTH/2-text1.get_width()/2, 10))
+        display.blit(text2, (WIDTH/2-text2.get_width()/2, 120))
+        display.blit(text3, (WIDTH/2-text3.get_width()/2, 120 + 50))
+        display.blit(text4, (WIDTH/2-text4.get_width()/2, 120 + 50*2))
+        display.blit(text5, (WIDTH/2-text5.get_width()/2, 120 + 50*3))
+        display.blit(text6, (WIDTH/2-text6.get_width()/2, 120 + 50*4))
+        display.blit(text7, (WIDTH/2-text7.get_width()/2, 120 + 50*5))
+        display.blit(text8, (WIDTH/2-text8.get_width()/2, 120 + 50*6))
+
         values = pygame.image.load(path.join(BASEDIR, "images/values.png")).convert()
         display.blit(values, (WIDTH/2-values.get_width()/2, 50))
-        display.blit(text1, (WIDTH/2-text1.get_width()/2, HEIGHT/3 - 10))
-        display.blit(text2, (WIDTH/2-text2.get_width()/2, HEIGHT/2 - 60))
-        display.blit(text3, (WIDTH/2-text3.get_width()/2, HEIGHT/1.5 - 80))
-        display.blit(text4, (WIDTH/2-text4.get_width()/2, HEIGHT/1.5 - 40))
-        display.blit(text5, (WIDTH/2-text5.get_width()/2, 10))
-        button3 = Button(WIDTH/2-75, HEIGHT/1.3, 150, 60, buttonText="Back", onclickFunction=mainMenu)
-        button3.process()
-        button3.draw()
+        
+        button1 = Button(WIDTH/2-75, HEIGHT/1.3, 150, 60, buttonText="Back", onclickFunction=mainMenu)
+        button1.process()
+        button1.draw()
+
+        pygame.display.flip()
+        clock.tick(FPS)
+
+def howToEditor():
+    running = True
+    while running:
+        display.fill(BLACK[0])
+        for event in pygame.event.get():
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    running = False
+                    mainMenu()
+            if event.type == QUIT:
+                quit()
+
+        text1 = font.render('You can choose brick\'s color', True, WHITE[0])
+        text2 = font.render('Each block has different value', True, WHITE[0])
+        text3 = font.render('50    60     70     80     90     100     110   120', True, WHITE[0])
+        display.blit(text1, (WIDTH/2-text1.get_width()/2, 20))
+        display.blit(text2, (WIDTH/2-text2.get_width()/2, 150))
+        display.blit(text3, (WIDTH/2-text3.get_width()/2, 120))
+
+        values = pygame.image.load(path.join(BASEDIR, "images/choosingGridBlocks.png")).convert()
+        display.blit(values, (WIDTH/2-values.get_width()/2, 50))
+
+        button1 = Button(WIDTH/2-75, HEIGHT/1.3, 150, 60, buttonText="Back", onclickFunction=editor)
+        button1.process()
+        button1.draw()
 
         pygame.display.flip()
         clock.tick(FPS)
@@ -220,6 +258,7 @@ def editor():
                 button4.process()
                 # button5.process()
                 # button6.process()
+                button7.process()
             # inputBox.handle_event(event)
 
         # print(editorClass.currentLevel)
@@ -238,6 +277,7 @@ def editor():
         button4 = Button(WIDTH - 60, 50, 30, 30, buttonText=">", onclickFunction=loadNextEditorLevel, onePress=True)
         # button5 = Button(WIDTH/2-75, 20, 150, 60, buttonText="Delete", onclickFunction=deleteEditorLevel, onePress=True)
         # button6 = Button(WIDTH/2, 20, 150, 60, buttonText="Clear", onclickFunction=clearEditorLevel, onePress=True)
+        button7 = Button(3, 3, 150, 60, buttonText="Help", onclickFunction=howToEditor, onePress=True)
         
         button1.draw()
         button2.draw()
@@ -245,6 +285,7 @@ def editor():
         button4.draw()
         # button5.draw()
         # button6.draw()
+        button7.draw()
 
         text2 = font.render(f'Level: {str(editorClass.currentLevel)}', True, (0, 255, 0))
         display.blit(text2, (WIDTH-150, 10))
@@ -393,7 +434,7 @@ def changeSteeringType():
         settings.steeringType = "keyboard"
     else:
         settings.steeringType = "mouse"
-    print(settings.steeringType)
+    # print(settings.steeringType)
 
 def manageLifes():
     global SCORE, PREVSCORE
