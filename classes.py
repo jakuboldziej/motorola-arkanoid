@@ -31,6 +31,7 @@ class Button():
         mousePos = pygame.mouse.get_pos()
 
         if self.buttonRect.collidepoint(mousePos):
+            mouse.pointer = True
             if pygame.mouse.get_pressed(num_buttons=3)[0] and self.clicked == False:
                 self.buttonSurface.fill(self.fillColors['pressed'])
                 self.clicked = True
@@ -41,7 +42,9 @@ class Button():
                     self.alreadyPressed = False
             else:
                 self.clicked = False
-        
+        else:
+            mouse.pointer = False
+
     def draw(self):
         mousePos = pygame.mouse.get_pos()
         self.buttonSurface.fill(self.fillColors['normal'])
@@ -116,7 +119,7 @@ class Platform(pygame.sprite.Sprite):
                 self.platformDirection = "right"
             else:
                 self.platformDirection = "center"
-            if ball.stick == True and ball.rect[1] < WIDTH - 200:
+            if ball.stick == True and ball.rect.y < HEIGHT - 20:
                 if pressed_keys[K_SPACE]:
                     ball.stick = False
                     if self.platformDirection == "left":
@@ -141,18 +144,21 @@ class Platform(pygame.sprite.Sprite):
         pygame.draw.rect(display, WHITE[0], pygame.Rect(self.rect[0], self.rect[1], self.rect[2], self.rect[3]))
 
     def releaseBall(self):
-        if self.platformDirection == "left":
-            ball.directionX = -ball.speedX
-            ball.directionY = -ball.speedY
-            ball.direction = "left," + ball.direction.split(",")[1]
-        elif self.platformDirection == "right":
-            ball.directionX = +ball.speedX
-            ball.directionY = -ball.speedY
-            ball.direction = "left," + ball.direction.split(",")[1]
-        else:
-            ball.directionX = 0
-            ball.directionY = -ball.speedY
-            ball.direction = "0," + ball.direction.split(",")[1]
+        print(ball.stick, self.platformDirection)
+        if ball.stick == True:
+            ball.stick = False
+            if self.platformDirection == "left":
+                ball.directionX = -ball.speedX
+                ball.directionY = -ball.speedY
+                ball.direction = "left," + ball.direction.split(",")[1]
+            elif self.platformDirection == "right":
+                ball.directionX = +ball.speedX
+                ball.directionY = -ball.speedY
+                ball.direction = "left," + ball.direction.split(",")[1]
+            elif self.platformDirection == "center":
+                ball.directionX = 0
+                ball.directionY = -ball.speedY
+                ball.direction = "0," + ball.direction.split(",")[1]
 
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
@@ -436,6 +442,13 @@ class Mouse(pygame.sprite.Sprite):
         self.surf.fill(WHITE[0])
         self.rect = self.surf.get_rect(center=(self.pos[0], self.pos[1]))
         self.choosingColor = WHITE
+        self.pointer = False
+
+    def update(self):
+        if self.pointer == True:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+        else:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
 class Settings:
     def __init__(self):
@@ -451,6 +464,7 @@ mouse = Mouse()
 
 bricks = pygame.sprite.Group()
 # balls = pygame.sprite.Group()
+buttons = pygame.sprite.Group()
 powerUps = pygame.sprite.Group()
 gridBlocks = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()

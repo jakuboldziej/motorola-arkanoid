@@ -16,10 +16,14 @@ def loadlevels():
 
 def loadNextLevel():
     global PREVSCORE, bricks, platform
+    ball.directionX = 0
+    ball.directionY = 0
+    ball.rect[0] = platform.rect[0] + platform.rect[2]/2 - ball.rect[2]/2
+    ball.rect[1] = platform.rect[1] - 25
+    ball.stick = True
     platform.currentLevel += 1
     PREVSCORE += level.winscore
     level.winscore = 0
-    ball.stick = True
     for brick in bricks:
         brick.kill()
     print("next level", platform.currentLevel)
@@ -142,6 +146,15 @@ def restartBall():
 
 # Game Loops
 def howToPlay():
+    text1 = font.render('Brick values:', True, WHITE[0])
+    text2 = font.render('Silver blocks: 50 * level number.', True, WHITE[0])
+    text3 = font.render('Gold blocks are indestructible.', True, WHITE[0])
+    text4 = font.render('Silver blocks needs 2 hits to brake and extra hit is needed every 8 levels.', True, WHITE[0])
+    text5 = font.render('You can move platform by pressing arrow keys on your keyboard', True, WHITE[0])
+    text6 = font.render('or by moving your mouse.', True, WHITE[0])
+    text7 = font.render('Press spacebar to release the ball.', True, WHITE[0])
+    text8 = font.render('Press escape to stop the game.', True, WHITE[0])
+
     running = True
     while running:
         display.fill(BLACK[0])
@@ -153,14 +166,6 @@ def howToPlay():
             if event.type == QUIT:
                 quit()
 
-        text1 = font.render('Brick values:', True, WHITE[0])
-        text2 = font.render('Silver blocks: 50 * level number.', True, WHITE[0])
-        text3 = font.render('Gold blocks are indestructible.', True, WHITE[0])
-        text4 = font.render('Silver blocks needs 2 hits to brake and extra hit is needed every 8 levels.', True, WHITE[0])
-        text5 = font.render('You can move platform by pressing arrow keys on your keyboard', True, WHITE[0])
-        text6 = font.render('or by moving your mouse.', True, WHITE[0])
-        text7 = font.render('Press spacebar to release the ball.', True, WHITE[0])
-        text8 = font.render('Press escape to stop the game.', True, WHITE[0])
         display.blit(text1, (WIDTH/2-text1.get_width()/2, 10))
         display.blit(text2, (WIDTH/2-text2.get_width()/2, 120))
         display.blit(text3, (WIDTH/2-text3.get_width()/2, 120 + 50))
@@ -210,6 +215,9 @@ def howToEditor():
         clock.tick(FPS)
 
 def settingsLoop():
+    button1 = Button(WIDTH/2-75, HEIGHT/1.3, 160, 60, buttonText="Back", onclickFunction=mainMenu)
+    button2 = Button(WIDTH/10 + 200, HEIGHT/7, 150, 60, buttonText="Change", onclickFunction=changeSteeringType)
+
     running = True
     while running:
         display.fill(BLACK[0])
@@ -227,8 +235,6 @@ def settingsLoop():
         text1 = font.render(f'Platform is controlled by: {settings.steeringType}.', True, (255, 255, 255))
         display.blit(text1, (WIDTH/10, HEIGHT/12))
         
-        button1 = Button(WIDTH/2-75, HEIGHT/1.3, 160, 60, buttonText="Back", onclickFunction=mainMenu)
-        button2 = Button(WIDTH/10 + 200, HEIGHT/7, 150, 60, buttonText="Change", onclickFunction=changeSteeringType)
         button1.draw()
         button2.draw()
         
@@ -239,6 +245,15 @@ def editor():
     # inputBox = InputBox(300, 0, 50, 32)
     editorClass.creatingGrid()
     # print(editorClass.currentLevel)
+
+    button1 = Button(WIDTH/2-75, HEIGHT/1.2, 150, 60, buttonText="Back", onclickFunction=mainMenu)
+    button2 = Button(3, HEIGHT-63, 150, 60, buttonText="Save", onclickFunction=saveEditor)
+    button3 = Button(WIDTH - 147, 50, 30, 30, buttonText="<", onclickFunction=loadPrevEditorLevel, onePress=True)
+    button4 = Button(WIDTH - 60, 50, 30, 30, buttonText=">", onclickFunction=loadNextEditorLevel, onePress=True)
+    # button5 = Button(WIDTH/2-75, 20, 150, 60, buttonText="Delete", onclickFunction=deleteEditorLevel, onePress=True)
+    # button6 = Button(WIDTH/2, 20, 150, 60, buttonText="Clear", onclickFunction=clearEditorLevel, onePress=True)
+    button7 = Button(3, 3, 150, 60, buttonText="Help", onclickFunction=howToEditor, onePress=True)
+
     running = True
     while running:
         global mouse
@@ -271,14 +286,6 @@ def editor():
             choosingGridBlock.draw()
             choosingGridBlock.process()
 
-        button1 = Button(WIDTH/2-75, HEIGHT/1.2, 150, 60, buttonText="Back", onclickFunction=mainMenu)
-        button2 = Button(3, HEIGHT-63, 150, 60, buttonText="Save", onclickFunction=saveEditor)
-        button3 = Button(WIDTH - 147, 50, 30, 30, buttonText="<", onclickFunction=loadPrevEditorLevel, onePress=True)
-        button4 = Button(WIDTH - 60, 50, 30, 30, buttonText=">", onclickFunction=loadNextEditorLevel, onePress=True)
-        # button5 = Button(WIDTH/2-75, 20, 150, 60, buttonText="Delete", onclickFunction=deleteEditorLevel, onePress=True)
-        # button6 = Button(WIDTH/2, 20, 150, 60, buttonText="Clear", onclickFunction=clearEditorLevel, onePress=True)
-        button7 = Button(3, 3, 150, 60, buttonText="Help", onclickFunction=howToEditor, onePress=True)
-        
         button1.draw()
         button2.draw()
         button3.draw()
@@ -295,13 +302,21 @@ def editor():
         pygame.display.flip()
         clock.tick(FPS)
 
-def mainMenu():
+def mainMenu():    
+    button6 = Button(WIDTH/2-75, HEIGHT-63, 150, 60, buttonText="Editor", onclickFunction=editor)
+    
+    button2 = Button(WIDTH/2-75, HEIGHT/2-30, 150, 60, buttonText="Settings", onclickFunction=settingsLoop)
+    button3 = Button(WIDTH/2-75, HEIGHT/2+40, 150, 60, buttonText="Exit", onclickFunction=exit)
+    button4 = Button(WIDTH-203, 3, 200, 60, buttonText="How To Play", onclickFunction=howToPlay)
+
     running = True
     while running:
         display.fill(BLACK[0])
         for event in pygame.event.get():
             if event.type == QUIT:
                 quit()
+
+        mouse.update()
 
         if playing:
             button1 = Button(WIDTH/2-75, HEIGHT/2-100, 150, 60, buttonText="Resume", onclickFunction=main)
@@ -310,23 +325,17 @@ def mainMenu():
             button5.draw()
         else:
             button1 = Button(WIDTH/2-75, HEIGHT/2-100, 150, 60, buttonText="Start", onclickFunction=loadlevels)
-        
-        button6 = Button(WIDTH/2-75, HEIGHT-63, 150, 60, buttonText="Editor", onclickFunction=editor)
-        button6.process()
-        button6.draw()
-
-        button2 = Button(WIDTH/2-75, HEIGHT/2-30, 150, 60, buttonText="Settings", onclickFunction=settingsLoop)
-        button3 = Button(WIDTH/2-75, HEIGHT/2+40, 150, 60, buttonText="Exit", onclickFunction=exit)
-        button4 = Button(WIDTH-203, 3, 200, 60, buttonText="How To Play", onclickFunction=howToPlay)
 
         button1.process()
         button2.process()
         button3.process()
         button4.process()
+        button6.process()
         button1.draw()
         button2.draw()
         button3.draw()
         button4.draw()
+        button6.draw()
 
         pygame.display.flip()
         clock.tick(FPS)
@@ -352,7 +361,6 @@ def main():
                     platform.platformDirection = "center"
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if settings.steeringType == "mouse":
-                    ball.stick = False
                     platform.releaseBall()
 
         drawWindow()
