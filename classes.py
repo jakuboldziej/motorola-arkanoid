@@ -31,19 +31,12 @@ class Button():
         mousePos = pygame.mouse.get_pos()
 
         if self.buttonRect.collidepoint(mousePos):
-            mouse.pointer = True
-            if pygame.mouse.get_pressed(num_buttons=3)[0] and self.clicked == False:
+            if pygame.mouse.get_pressed(num_buttons=3)[0]:
                 self.buttonSurface.fill(self.fillColors['pressed'])
                 self.clicked = True
-                if not self.alreadyPressed:
-                    self.onclickFunction()
-                    self.alreadyPressed = True
-                else:
-                    self.alreadyPressed = False
+                self.onclickFunction()
             else:
                 self.clicked = False
-        else:
-            mouse.pointer = False
 
     def draw(self):
         mousePos = pygame.mouse.get_pos()
@@ -445,10 +438,12 @@ class Mouse(pygame.sprite.Sprite):
         self.pointer = False
 
     def update(self):
-        if self.pointer == True:
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-        else:
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+        # if self.pointer == True:
+            # pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+        # else:
+            # pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+        
 
 class Settings:
     def __init__(self):

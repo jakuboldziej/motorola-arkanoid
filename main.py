@@ -216,7 +216,7 @@ def howToEditor():
 
 def settingsLoop():
     button1 = Button(WIDTH/2-75, HEIGHT/1.3, 160, 60, buttonText="Back", onclickFunction=mainMenu)
-    button2 = Button(WIDTH/10 + 200, HEIGHT/7, 150, 60, buttonText="Change", onclickFunction=changeSteeringType)
+    button2 = Button(WIDTH/10 + 200, HEIGHT/7, 150, 60, buttonText="Change", onclickFunction=changeSteeringType, onePress=True)
 
     running = True
     while running:
