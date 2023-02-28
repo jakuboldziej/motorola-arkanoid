@@ -1,33 +1,46 @@
 from classes import *
 
-import random
-
 class Level:
-    def __init__(self, brickAmount):
+    def __init__(self):
         super(Level, self).__init__()
-        self.brickAmount = brickAmount
         self.winscore = 0
-        self.Spacebetween = 90   # odstep miedzy blokami
-        self.Margin = 85 #poczatkowy margines
+        self.brickArray = []
+        self.powerUpRate = 4
+    
+    def calcScore(self, brick):
+        if brick.color in COLORFUL:
+            self.winscore += brick.value
 
     def draw(self):
-        Testbrick = Brick(0,0,random.choice(COLORS))
-        brickx = Testbrick.get_width()
-        self.Margin = (WIDTH+self.brickAmount/2 - (brickx *self.brickAmount/2))/2    #self.brickAmount/ilość kolumn
-        for i in range(self.brickAmount):
-            if i < self.brickAmount/2:
-                new_brick = Brick(self.Margin + i*self.Spacebetween, HEIGHT/4, random.choice(COLORS))
-                if new_brick.color in COLORFUL: 
-                    self.winscore += new_brick.color[1]
-                elif new_brick.color == SILVER:
-                    self.winscore += new_brick.color[1] * CURRENTLEVEL
-            else:
-                new_brick = Brick(self.Margin + (i-8)*self.Spacebetween, HEIGHT/4 - 40, random.choice(COLORS))
-                if new_brick.color in COLORFUL: 
-                    self.winscore += new_brick.color[1]
-                elif new_brick.color == SILVER:
-                    self.winscore += new_brick.color[1] * CURRENTLEVEL
+        with open("levels.json", "r+") as f:
+            data = json.load(f)
+            levels = data["levels"]
 
-            bricks.add(new_brick)
-            all_sprites.add(new_brick) #a
+        if levels:
+            for level in levels:
+                levelId = level["levelId"]
+                if int(levelId) == platform.currentLevel:
+                    gridArray = level["gridArray"]
+                    self.brickArray = gridArray
 
+            startingY = 30*3
+            startingX = 0
+            brickCount = ROWCOUNT*15
+                
+            for i in range(brickCount):
+                if i%15==0 and i != 0:
+                    startingX -= WIDTH
+                    startingY += 30
+
+                brick = gridArray.get(f"{i+1}")
+                if brick != None:
+                    for color in COLORS:
+                        if literal_eval(brick) == color[0]:
+                            brickColor = color
+
+                    newBrick = Brick(startingX+i*80, startingY, color=brickColor)
+                    self.calcScore(newBrick)
+                    bricks.add(newBrick)
+        else:
+            text1 = font.render('No Levels', True, (255, 255, 255))
+            display.blit(text1, (WIDTH/2-text1.get_width()/2, HEIGHT/4-text1.get_height()/2))
